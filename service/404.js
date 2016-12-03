@@ -3,12 +3,13 @@ var url = require('url');
 var config = require('../config');
 
 module.exports = function* (next) {
-    var accept = this.accept('html', 'json');
+    var accept = this.accepts('html', 'json');
     if (accept == 'html') {
         var redirectUrl = url.format({
-            domain: config.domain,
-            path: 'page-not-found'
+            host: config.domain,
+            pathname: 'page-not-found'
         });
-        this.redirect(redirectUrl);
+        // this.redirect(redirectUrl);
+        this.body = '404 happens!';
     }
 }

@@ -10,11 +10,6 @@ var modules = require('./modules');
 var routers = require('./routers');
 var service = require('./service');
 
-
-
-
-
-
 //session config
 var CONFIG = {
   key: 'koa:sess', /** (string) cookie key (default is koa:sess) */
@@ -23,9 +18,6 @@ var CONFIG = {
   httpOnly: true, /** (boolean) httpOnly or not (default true) */
   signed: true, /** (boolean) signed or not (default true) */
 };
-
-
-// app.use(modules.timer());
 
 
 // //x-response-time
@@ -81,7 +73,8 @@ function* start(){
 		modules.version(ver),
 		session(CONFIG,app),
 
-		routers.start()
+		routers.start(),
+		service['404']
 	]);
 
 	app.use(modules.urlFilter(mw));
