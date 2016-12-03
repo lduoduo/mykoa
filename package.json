@@ -1,7 +1,7 @@
 {
-  "name": "push-demo",
+  "name": "mykoa",
   "version": "1.0.0",
-  "description": "push demos based on service worker and push api",
+  "description": "my koa frameworks",
   "main": "apps.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lduoduo/push-demo.git"
+    "url": "git+https://github.com/lduoduo/mykoa.git"
   },
   "author": "lduoduo",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lduoduo/push-demo/issues"
+    "url": "https://github.com/lduoduo/mykoa/issues"
   },
-  "homepage": "https://github.com/lduoduo/push-demo#readme",
+  "homepage": "https://github.com/lduoduo/mykoa#readme",
   "dependencies": {
     "co": "^4.6.0",
     "koa": "^1.2.4",
