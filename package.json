@@ -1,0 +1,30 @@
+{
+  "name": "push-demo",
+  "version": "1.0.0",
+  "description": "push demos based on service worker and push api",
+  "main": "apps.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node apps.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lduoduo/push-demo.git"
+  },
+  "author": "lduoduo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lduoduo/push-demo/issues"
+  },
+  "homepage": "https://github.com/lduoduo/push-demo#readme",
+  "dependencies": {
+    "co": "^4.6.0",
+    "koa": "^1.2.4",
+    "koa-compose": "^2.5.1",
+    "koa-cors": "0.0.16",
+    "koa-route": "^2.4.2",
+    "koa-session": "^3.4.0",
+    "koa-static": "^2.0.0",
+    "url": "^0.11.0"
+  }
+}
