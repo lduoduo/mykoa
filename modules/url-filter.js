@@ -1,4 +1,6 @@
 /** url过滤中间件 */
+'use strict';
+
 module.exports = function (mw) {
 
     return function* (next) {

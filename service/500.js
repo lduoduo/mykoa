@@ -1,4 +1,5 @@
 /** 500 内部错误展示 */
+'use strict';
 
 module.exports = function* (next) {
     try {

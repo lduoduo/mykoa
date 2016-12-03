@@ -1,4 +1,5 @@
 /** service层业务逻辑收口 */
+'use strict';
 
 module.exports = {
     test: require('./test'),

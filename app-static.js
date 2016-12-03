@@ -1,7 +1,9 @@
+'use strict';
+
 var koa = require('koa');
 var app = koa();
 
-var static = require('koa-static');
+var statics = require('koa-static');
 /**跨域处理 */
 var cors = require('koa-cors');
 
@@ -14,7 +16,7 @@ module.exports = function () {
     if (env == 'dev') {
         app.use(cors());
         
-        app.use(static(__dirname + '/public'));
+        app.use(statics(__dirname + '/public'));
 
         app.listen(staticPort);
 

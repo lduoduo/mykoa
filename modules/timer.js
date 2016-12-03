@@ -1,4 +1,6 @@
 /** 时间打印中间件 */
+'use strict';
+
 module.exports = function () {
     return function* (next) {
         const paths = this.path;

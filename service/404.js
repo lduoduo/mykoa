@@ -1,4 +1,6 @@
 /** 404页面 */
+'use strict';
+
 var url = require('url');
 var config = require('../config');
 
