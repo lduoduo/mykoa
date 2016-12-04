@@ -1,7 +1,8 @@
+/** all tools entry */
 'use strict';
 
 module.exports = {
-    timer: require('./timer'),
-    version: require('./version'),
-    urlFilter: require('./url-filter')
+    timer: require('./tools/timer'),
+    version: require('./tools/version'),
+    urlFilter: require('./tools/url-filter')
 }

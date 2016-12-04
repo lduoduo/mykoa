@@ -1,6 +1,6 @@
 'use strict';
 
-/** 启动主服务器 */
+/** start main server */
 var server = require('./app-server')();
-/** 启动静态资源服务器 */
+/** start static server(send staic files such as js/css/jpg/png) */
 var statics = require('./app-static')();

@@ -70,18 +70,23 @@ function* start(){
 	var ver = require('./package.json').version;
 
 	var mw = compose([
+		/** control internal error */
 		service['500'],
+		/** send response time to browser */
 		modules.timer(),
+		/** send version of server to browser */
 		modules.version(ver),
+		/** init session storage */
 		session(CONFIG,app),
-
+		/** init local route */
 		routers.start(),
+		/** handle all 404 errors */
 		service['404']
 	]);
 
 	app.use(modules.urlFilter(mw));
 
-	app.use(service['404']);
+	// app.use(service['404']);
 
 	app.listen(config.serverPort);
 

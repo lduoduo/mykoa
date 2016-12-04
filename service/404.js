@@ -1,4 +1,4 @@
-/** 404页面 */
+/** 404 page */
 'use strict';
 
 var url = require('url');

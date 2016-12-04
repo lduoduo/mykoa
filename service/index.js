@@ -1,4 +1,4 @@
-/** service层业务逻辑收口 */
+/** service entry */
 'use strict';
 
 module.exports = {

@@ -1,4 +1,4 @@
-/**路由配置中心 */
+/** route configure center */
 'use strict';
 
 var route = require('koa-route');
@@ -9,9 +9,9 @@ var service = require('../service');
 exports.start = function () {
     var rootPath = config.rootPath;
     return compose([
-        //test页面
+        //page test
         route.get(rootPath + '/test', service.test.index),
-        //aa页面
+        //page aa
         route.get(rootPath + '/aa', service.aa.index),
     ]);
 }

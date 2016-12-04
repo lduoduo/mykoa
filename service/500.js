@@ -1,4 +1,4 @@
-/** 500 内部错误展示 */
+/** 500 internal error control */
 'use strict';
 
 module.exports = function* (next) {

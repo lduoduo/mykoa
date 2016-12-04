@@ -1,4 +1,4 @@
-/** 时间打印中间件 */
+/** middleware for time to log how long from a request to a response */
 'use strict';
 
 module.exports = function () {
