@@ -13,5 +13,5 @@
 
 > `2016-1204` why yield function use co-view will make me down something in the browser when i request the page? 
 
-##### wrong template path...
+##### you should set the type of response to 'html', default value was `application/octet-stream`...
 --
