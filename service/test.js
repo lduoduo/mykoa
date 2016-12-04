@@ -1,15 +1,23 @@
 /** service logic control of page test */
 'use strict';
 
+var view  = require('../modules/render/bigpipe/bp');
+
 module.exports = {
     index: function* (next){
 
-        var tmp = this.body;
-        this.body = this.url;
+        this.body = new view('test',this);
+        // var tmp = this.body;
+        // this.body = this.url;
+        this.body.page('testa',{
+            title: 'test koa'
+        });
 
-        setTimeout(function(){
-            tmp += 'duoduo';
-        },3000);
+        yield this.body.render();
+
+        // setTimeout(function(){
+        //     tmp += 'duoduo';
+        // },3000);
 
     }
 }

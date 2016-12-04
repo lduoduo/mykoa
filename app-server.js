@@ -91,7 +91,7 @@ function* start(){
 	app.listen(config.serverPort);
 
 	app.on('error',function(err,ctx){
-		console.log('err:'+err.statck);
+		console.log('err:'+err.stack);
 	});
 
 	console.log('server on '+ config.serverPort);

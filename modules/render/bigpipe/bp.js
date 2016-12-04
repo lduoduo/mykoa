@@ -19,6 +19,7 @@
 'use strict';
 
 var Readable = require('stream').Readable;
+var co = require('co');
 
 var config = require('../../../config');
 var render = require('../render');
@@ -27,18 +28,23 @@ var render = require('../render');
 const viewPath = '../../views/';
 const tplPath = '../../tpl/';
 
+/** for testing */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 module.exports = class View extends Readable {
     /** why need ctx here? we need pass in common variables in koa to use */
     constructor(option, ctx) {
 
         super();
 
+        ctx.type = "html";
+
         this.data = {
 
             /** states of server */
-            state: ctx.state,
+            state: ctx.state || {},
             /** querystring object of request */
-            query: ctx.query,
+            query: ctx.query || {},
             staticPaths: 'localhost:8090', //hardcode for now
             config: config
 
@@ -49,17 +55,17 @@ module.exports = class View extends Readable {
         this.pointer = this.components.length;
 
         /** set page folder and tpl folder */
-        let fd = this.folder = {};
-        if (typeof option == "String") {
-            fd.view = fd.tpl = option;
+        this.viewFolder = this.tplFoler = "";
+        if (typeof option == "string") {
+            this.viewFolder = this.tplFoler = option;
         } else if (option instanceof 'Object') {
-            fd.view = option.view;
-            fd.tpl = option.tpl || option.view;
+            this.viewFolder = option.view;
+            this.tplFoler = option.tpl || option.view;
         } else {
             new Error('invalid param for option in bp.js');
             return;
         }
-        if (!fd.view) {
+        if (!this.viewFolder) {
             new Error('invalid param for option in bp.js');
             return;
         }
@@ -98,25 +104,32 @@ module.exports = class View extends Readable {
     }
 
     /** render html */
-    render(){
+    render() {
 
         var body = this;
 
-        return function* (){
+        return function* () {
             /** render page view */
-            var content = yield render(body.pageName, body.data);
+            var content = yield render(body.viewFolder + "/" + body.data.pageName, body.data);
 
             body.push(content);
 
             /** render tpl components*/
-
+            renderComponents(body);
         }
     }
 }
 
-function renderComponents(){
-    co(function *(){
-        yield sleep(2000);
-
-    })
+function renderComponents(body) {
+    co(function* () {
+        yield sleep(5000);
+        body.push(`
+            <script>
+                document.getElementById('content').innerHTML = 'Hello duoduo';
+            </script>
+        `);
+        body.push(null);
+    }).catch(e => {
+        console.log(e);
+    });
 }

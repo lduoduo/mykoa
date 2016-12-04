@@ -5,6 +5,7 @@ module.exports = function* (next) {
     try {
         yield next;
     } catch (e) {
-        this.body = "500 happens";
+        console.log(e);
+        this.body = "500 happens:" + e.message;
     }
 }

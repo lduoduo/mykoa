@@ -1,4 +1,4 @@
-/** dev配置中心 */
+/** dev configure center */
 'use strict';
 
 module.exports = class Config {

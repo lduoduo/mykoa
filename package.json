@@ -19,6 +19,8 @@
   "homepage": "https://github.com/lduoduo/mykoa#readme",
   "dependencies": {
     "co": "^4.6.0",
+    "co-views": "^2.1.0",
+    "ejs": "^2.5.3",
     "koa": "^1.2.4",
     "koa-compose": "^2.5.1",
     "koa-cors": "0.0.16",
