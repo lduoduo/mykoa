@@ -9,5 +9,13 @@
     
     <!--本页面js-->
     <!--<- staticPaths.js %>-->
+    <script>
+        function bigpipe(id, content){
+            var dom = document.querySelector('component[name='+id+']');
+            dom.replaceWith(content);
+            var sdom = document.querySelector('#componet_'+id);
+            sdom.remove()
+        }
+    </script>
 </body>
 </html>

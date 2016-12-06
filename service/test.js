@@ -13,6 +13,9 @@ module.exports = {
             title: 'test koa'
         });
 
+        this.body.add('a');
+        this.body.add('b');
+
         yield this.body.render();
 
         // setTimeout(function(){

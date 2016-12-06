@@ -20,10 +20,11 @@
 
 var Readable = require('stream').Readable;
 var co = require('co');
+var path = require('path');
+
 
 var config = require('../../../config');
 var render = require('../render');
-
 
 const viewPath = '../../views/';
 const tplPath = '../../tpl/';
@@ -121,15 +122,86 @@ module.exports = class View extends Readable {
 }
 
 function renderComponents(body) {
-    co(function* () {
-        yield sleep(5000);
-        body.push(`
-            <script>
-                document.getElementById('content').innerHTML = 'Hello duoduo';
-            </script>
-        `);
+    let promises = []; let count = body.components.length;
+    body.components.forEach(function (item) {
+        let comp = item;
+        let name = item.name;
+        let url = item.url;
+        let promise;
+
+        promise = new Promise(renderTpl(body, name, url)).then(function (html) {
+            end(html, name);
+            count--;
+        });
+        promises.push(promise);
+    });
+
+    Promise.all(promises).then(function () {
         body.push(null);
-    }).catch(e => {
+    }).catch(function (e) {
         console.log(e);
     });
+    // co(function* () {
+    //     yield sleep(3000);
+    //     body.push(`
+    //         <script>
+    //             document.getElementById('content').innerHTML = 'Hello duoduo';
+    //         </script>
+    //     `);
+    //     yield sleep(5000);
+    //     body.push(`
+    //         <div>发送完毕！</div>
+    //     `);
+    //     body.push(null);
+    // }).catch(e => {
+    //     console.log(e);
+    // });
+
+    /** replace the placeholder with real html */
+    function end(html, name) {
+        body.push(`
+            <script id=${'componet_'+name}>
+                bigpipe(${name},${html});
+            </script>
+        `)
+    }
+}
+
+function renderTpl(body, name, url) {
+    return function (resolve, rejected) {
+        if (!url) { resolve(''); return; }
+
+        /** get template */
+        let comTplPath = path.join(__dirname, tplPath, body.tplFoler, name, '.ejs');
+        let tplStr = yield readFile(comTplPath);
+        let html = "";
+
+        var t = Math.floor(Math.random() * 10) * 1000;
+
+        try {
+            html = ejs.render(tplStr, { data: t }, {
+                filename: 'tpl/' + body.tplFoler + '/' + name
+            });
+        } catch (error) {
+            html = '<pre>' + error.stack + '</pre>';
+        }
+
+        setTimeout(function () {
+            resolve(html);
+        }, t);
+
+    }
+}
+
+
+/**读取layout文件 */
+function readFile(path) {
+    return function (done) {
+        fs.readFile(path, 'utf8', function (err, str) {
+            if (err) return done(err);
+            // remove extraneous utf8 BOM marker
+            str = str.replace(/^\uFEFF/, '');
+            done(null, str);
+        });
+    }
 }
