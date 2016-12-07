@@ -13,7 +13,7 @@ follow the orders below.
 + `master` [connect]: https://github.com/lduoduo/mykoa
  > ##### always be the latest branch merged with all other branches.
 
-+ `original` [connect]: https://github.com/lduoduo/mykoa
++ `original` [connect]: https://github.com/lduoduo/mykoa/tree/original
  > ##### original one, this branch include basic function.
  
 + `bigpipe` [connect]: https://github.com/lduoduo/mykoa/tree/bigpipe
