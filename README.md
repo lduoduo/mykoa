@@ -14,4 +14,7 @@ now begin...
 
 + `bigpipe-request` [connect]: https://github.com/lduoduo/mykoa/tree/bigpipe-request
 [connect](https://github.com/lduoduo/mykoa/tree/bigpipe-request)
- > ##### this branch render template with http request use bigpipe
+ > ##### this branch render template with http request use bigpipe.
+
++ `static-files` [connect]: https://github.com/lduoduo/mykoa/tree/static-files
+ > ##### this branch manage request of static files such as js/css/png/jpg files.
