@@ -5,7 +5,11 @@
  *  - init:
  *      this.body = new View(option, ctx);
  *  - add partial tpl:
- *      this.body.add(tpl_folder, data/url)
+ *      this.body.add(tpl_name)
+ *      this.body.add(tpl_name, data/url)
+ *      this.body.add(tpl_name, data/url, function(data){
+ *          return data;
+ *      });
  *  - render html
  *      yield this.body.render()
  * tips:
@@ -19,6 +23,7 @@
 'use strict';
 
 var Readable = require('stream').Readable;
+var request = require('request');
 var co = require('co');
 var path = require('path');
 var ejs = require('ejs');
@@ -124,84 +129,104 @@ module.exports = class View extends Readable {
 
 function renderComponents(body) {
     // return function (done) {
-        let promises = []; let count = body.components.length;
+    let promises = []; let count = body.components.length;
 
-        body.components.forEach(function (item) {
+    body.components.forEach(function (item) {
         // for(let i=0;i<body.components.length;i++){
-            // let item = body.components[i];
-            let comp = item;
-            let name = item.name;
-            let url = item.url;
-            let promise;
+        // let item = body.components[i];
+        let comp = item;
+        let name = item.name;
+        let url = item.url;
+        let promise;
 
-            promise = co(function* () {
-                return yield renderTpl(body, item, url);
-            }).then(function (html) {
-                end(html, name);
-            });
-
-            promises.push(promise);
+        promise = co(function* () {
+            return yield renderTpl(body, item, url);
+        }).then(function (html) {
+            end(html, name);
         });
 
-        Promise.all(promises).then(function () {
-            console.log('promises done');
-            body.push(null);
-        }).catch(function (e) {
-            console.log(e);
-        });
+        promises.push(promise);
+    });
 
-        // co(function* () {
-        //     yield sleep(3000);
-        //     body.push(`
-        //         <script>
-        //             document.getElementById('content').innerHTML = 'Hello duoduo';
-        //         </script>
-        //     `);
-        //     yield sleep(5000);
-        //     body.push(`
-        //         <div>发送完毕！</div>
-        //     `);
-        //     body.push(null);
-        // }).catch(e => {
-        //     console.log(e);
-        // });
+    Promise.all(promises).then(function () {
+        console.log('promises done');
+        body.push(null);
+    }).catch(function (e) {
+        console.log(e);
+    });
 
-        /** replace the placeholder with real html */
-        function end(html, name) {
-            html = html.replace(/\r\n/gi,'');
-            body.push(`
+    /** replace the placeholder with real html */
+    function end(html, name) {
+        html = html.replace(/[\n,\r,\t]/gi, '').replace(/\"/gi, '\\"');
+        body.push(`
             <script id=${'componet_' + name}>
                 bigpipe(\"${name}\",\"${html || "empty"}\");
             </script>
         `);
-        }
+    }
     // }
 
 }
 
 function* renderTpl(body, item, url) {
     let name = item.name;
+    let data = null;
     let cb = item.cb;
 
     // if (!url) { return ""; }
 
     /** get template */
-    let comTplPath = path.join(__dirname,'../', tplPath, body.tplFoler, name + '.ejs');
+    let comTplPath = path.join(__dirname, '../', tplPath, body.tplFoler, name + '.ejs');
     let tplStr = yield readFile(comTplPath);
     let html = "";
 
-    var t = Math.floor(Math.random() * 10) * 3000;
+    /** if no url passed in, means only need the template with no data */
+    if (!url) {
+        return ejs.render(tplStr, {}, {
+            filename: 'tpl/' + body.tplFoler + '/' + name
+        });
+    }
+
+    if (url instanceof Object) {
+        data = url;
+    }
+
+    if (typeof url == "string") {
+        data = yield function (cb) {
+            request(url, { json: true }, function (err, res, data) {
+                cb(err, data);
+            });
+        }
+    }
+
+    /** result is 404 page */
+    if (typeof data == "string") {
+        return data;
+    }
+
+    /** get real data */
+    data = data.statuscode && data.statuscode == 1 ? data.data : data;
+
+    if (!data) {
+        return data.statusmsg || data;
+    }
+
+    /** allow cb to filter the data */
+    data = cb ? cb(data) : data;
+
+    Object.assign(data, body.data);
 
     try {
-        html = ejs.render(tplStr, { data: t }, {
+        html = ejs.render(tplStr, { it: data }, {
             filename: 'tpl/' + body.tplFoler + '/' + name
         });
         // html = yield render(body.tplFoler + "/" + name, { data: t });
-    } catch (error) {
-        html = '<pre>' + error.stack + '</pre>';
+    } catch (err) {
+        html = '<pre>' + err.stack + '</pre>';
     }
 
-    yield sleep(t);
+    var t = Math.floor(Math.random() * 10) * 2000;
+    // yield sleep(t);
 
     return html;
 
