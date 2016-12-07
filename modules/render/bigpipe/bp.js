@@ -168,7 +168,7 @@ function renderComponents(body) {
 
         /** replace the placeholder with real html */
         function end(html, name) {
-            html = html.replace(/\r\n/gi,'');
+            html = html.replace(/[\n,\r,\t]/gi, '').replace(/\"/gi, '\\"');
             body.push(`
             <script id=${'componet_' + name}>
                 bigpipe(\"${name}\",\"${html || "empty"}\");
