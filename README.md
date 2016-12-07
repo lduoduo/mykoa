@@ -24,4 +24,10 @@ follow the orders below.
  > ##### this branch render template with http request use bigpipe.
 
 + `static-files` [20161207](https://github.com/lduoduo/mykoa/tree/static-files)
+<<<<<<< HEAD
  > ##### this branch manage request of static files such as js/css/png/jpg files.
+=======
+ > ##### this branch manage request of static files such as js/css/png/jpg files.
+
+ stop update this file forever.
+>>>>>>> bigpipe-request

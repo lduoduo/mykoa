@@ -9,5 +9,17 @@
     
     <!--本页面js-->
     <!--<- staticPaths.js %>-->
+    <script>
+        function bigpipe(id, content){
+            var dom = document.querySelector('component[name='+id+']');
+            var el = document.createElement("div");
+
+　　         el.innerHTML = content;//赋值以后其实objE已经具有DOM的对象了
+
+            dom.replaceWith(el.childNodes[0]);
+            var sdom = document.querySelector('#componet_'+id);
+            sdom.remove()
+        }
+    </script>
 </body>
 </html>
