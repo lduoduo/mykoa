@@ -7,23 +7,21 @@ var config = require('../config');
 module.exports = {
     index: function* (next){
 
+        /** init render js */
         this.body = new view('test',this);
-        // var tmp = this.body;
-        // this.body = this.url;
+
+        /** init page settings */
         this.body.page('testa',{
-            title: 'test koa'
+            title: 'test bigpipe'
         });
 
+        /** add components */
         this.body.add('a');
         this.body.add('b');
         this.body.add('c');
         this.body.add('d',config.interUrl + "list/getlist");
 
         yield this.body.render();
-
-        // setTimeout(function(){
-        //     tmp += 'duoduo';
-        // },3000);
 
     }
 }

@@ -1,22 +1,24 @@
  
-    <!-- 公共前端性能监控脚本 -->
+    <!-- common monitor -->
     <input type="hidden" id="commonMonitor" value='{"channel":"<%- config.rootPath %>","page":"<%= pageName %>", "whiteList":"10.1|localhost|sojump.com", "removeError":true}' />
     
-    <!--公共的js-->
-    <!--<- commons.js %>-->
+    <!--common js-->
+    <script src="<%- commons.js %>"></script>
 
-    <!--component render-->    
-    
-    <!--本页面js-->
-    <!--<- staticPaths.js %>-->
+    <!--component render-->
+
+    <!-- basic js-->
+    <script src="<%- '//' + config.ip + ':8090/js/zdodo.js' %>"></script>
+
+    <!--page js-->
+    <script src="<%- pageJs %>"></script>
+
     <script>
         function bigpipe(id, content){
             var dom = document.querySelector('component[name='+id+']');
             var el = document.createElement("div");
-
-　　         el.innerHTML = content;//赋值以后其实objE已经具有DOM的对象了
-
-            dom.replaceWith(el.childNodes[0]);
+　　         el.innerHTML = content;//赋值以后其实el已经具有DOM的对象了
+            dom.replaceWith(el);
             var sdom = document.querySelector('#componet_'+id);
             sdom.remove()
         }

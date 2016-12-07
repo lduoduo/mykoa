@@ -19,7 +19,7 @@ module.exports = function () {
         app.use(cors());
 
         /** static file folder */
-        app.use(statics(__dirname + '/public'));
+        app.use(statics(__dirname + '/public/app/dest'));
 
         app.listen(staticPort);
 

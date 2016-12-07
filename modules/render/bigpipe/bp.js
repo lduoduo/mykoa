@@ -8,10 +8,10 @@
  *      this.body.add(tpl_name)
  *      this.body.add(tpl_name, data/url)
  *      this.body.add(tpl_name, data/url, function(data){
- *          return data;
+ *          return data; //handle data by self
  *      });
  *  - render html
- *      yield this.body.render()
+ *      yield this.body.render();
  * tips:
  *  - 1. option = {
  *      view, //page folder name
@@ -53,8 +53,14 @@ module.exports = class View extends Readable {
             state: ctx.state || {},
             /** querystring object of request */
             query: ctx.query || {},
-            staticPaths: 'localhost:8090', //hardcode for now
-            config: config
+
+            config: config,
+            pageJs: config.frontURL.js,
+            pageCss: config.frontURL.css,
+            commons: {
+                js: config.frontURL.js + 'common.js',
+                css: config.frontURL.css + 'common.css'
+            }
 
         };
 
@@ -90,7 +96,10 @@ module.exports = class View extends Readable {
     /** render main page */
     page(name, data) {
 
-        this.data.pageName = name;
+        let tmp = this.data;
+        tmp.pageName = name;
+        tmp.pageJs += name + '.js';
+        tmp.pageCss += name + '.css';
         /** not support deep copy here */
         Object.assign(this.data, data);
 
@@ -165,8 +174,6 @@ function renderComponents(body) {
             </script>
         `);
     }
-    // }
-
 }
 
 function* renderTpl(body, item, url) {
