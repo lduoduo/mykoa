@@ -28,6 +28,7 @@ var co = require('co');
 var path = require('path');
 var ejs = require('ejs');
 var fs = require('fs');
+const os = require('os');
 
 var config = require('../../../config');
 var render = require('../render');
@@ -239,7 +240,7 @@ function readFile(path) {
         fs.readFile(path, 'utf8', function (err, str) {
             if (err) return done(err);
             // remove extraneous utf8 BOM marker
-            str = str.replace(/^\uFEFF/, '');
+            str = str.replace(os.EOL, '');
             done(null, str);
         });
     }

@@ -17,7 +17,7 @@ module.exports = {
         this.body.add('a');
         this.body.add('b');
         this.body.add('c');
-        this.body.add('d',config.interUrl + "linelist/getlinelist");
+        this.body.add('d',config.interUrl + "list/getlist");
 
         yield this.body.render();
 
