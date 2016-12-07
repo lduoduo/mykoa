@@ -5,7 +5,11 @@ now begin...
 
 
 ### branches info
-+ `bigpipe` [connect]: https://github.com/lduoduo/mykoa
+
++ `master` [connect]: https://github.com/lduoduo/mykoa
+ > ##### this branch include basic function.
+ 
++ `bigpipe` [connect]: https://github.com/lduoduo/mykoa/tree/bigpipe
  > ##### this branch include basic bigpipe function.
 
 + `bigpipe-request` [connect]: https://github.com/lduoduo/mykoa/tree/bigpipe-request
