@@ -15,6 +15,8 @@ module.exports = {
 
         this.body.add('a');
         this.body.add('b');
+        this.body.add('c');
+        this.body.add('d');
 
         yield this.body.render();
 

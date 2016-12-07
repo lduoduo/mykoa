@@ -21,7 +21,8 @@
 var Readable = require('stream').Readable;
 var co = require('co');
 var path = require('path');
-
+var ejs = require('ejs');
+var fs = require('fs');
 
 var config = require('../../../config');
 var render = require('../render');
@@ -122,75 +123,88 @@ module.exports = class View extends Readable {
 }
 
 function renderComponents(body) {
-    let promises = []; let count = body.components.length;
-    body.components.forEach(function (item) {
-        let comp = item;
-        let name = item.name;
-        let url = item.url;
-        let promise;
+    // return function (done) {
+        let promises = []; let count = body.components.length;
 
-        promise = new Promise(renderTpl(body, name, url)).then(function (html) {
-            end(html, name);
-            count--;
+        body.components.forEach(function (item) {
+        // for(let i=0;i<body.components.length;i++){
+            // let item = body.components[i];
+            let comp = item;
+            let name = item.name;
+            let url = item.url;
+            let promise;
+
+            promise = co(function* () {
+                return yield renderTpl(body, item, url);
+            }).then(function (html) {
+                end(html, name);
+            });
+
+            promises.push(promise);
         });
-        promises.push(promise);
-    });
 
-    Promise.all(promises).then(function () {
-        body.push(null);
-    }).catch(function (e) {
-        console.log(e);
-    });
-    // co(function* () {
-    //     yield sleep(3000);
-    //     body.push(`
-    //         <script>
-    //             document.getElementById('content').innerHTML = 'Hello duoduo';
-    //         </script>
-    //     `);
-    //     yield sleep(5000);
-    //     body.push(`
-    //         <div>发送完毕！</div>
-    //     `);
-    //     body.push(null);
-    // }).catch(e => {
-    //     console.log(e);
-    // });
+        Promise.all(promises).then(function () {
+            console.log('promises done');
+            body.push(null);
+        }).catch(function (e) {
+            console.log(e);
+        });
 
-    /** replace the placeholder with real html */
-    function end(html, name) {
-        body.push(`
-            <script id=${'componet_'+name}>
-                bigpipe(${name},${html});
+        // co(function* () {
+        //     yield sleep(3000);
+        //     body.push(`
+        //         <script>
+        //             document.getElementById('content').innerHTML = 'Hello duoduo';
+        //         </script>
+        //     `);
+        //     yield sleep(5000);
+        //     body.push(`
+        //         <div>发送完毕！</div>
+        //     `);
+        //     body.push(null);
+        // }).catch(e => {
+        //     console.log(e);
+        // });
+
+        /** replace the placeholder with real html */
+        function end(html, name) {
+            html = html.replace(/\r\n/gi,'');
+            body.push(`
+            <script id=${'componet_' + name}>
+                bigpipe(\"${name}\",\"${html || "empty"}\");
             </script>
-        `)
-    }
+        `);
+        }
+    // }
+
 }
 
-function renderTpl(body, name, url) {
-    return function (resolve, rejected) {
-        if (!url) { resolve(''); return; }
+function* renderTpl(body, item, url) {
+    let name = item.name;
+    let cb = item.cb;
 
-        /** get template */
-        let comTplPath = path.join(__dirname, tplPath, body.tplFoler, name, '.ejs');
-        let tplStr = yield readFile(comTplPath);
-        let html = "";
+    // if (!url) { return ""; }
 
-        var t = Math.floor(Math.random() * 10) * 1000;
+    /** get template */
+    let comTplPath = path.join(__dirname,'../', tplPath, body.tplFoler, name + '.ejs');
+    let tplStr = yield readFile(comTplPath);
+    let html = "";
 
-        try {
-            html = ejs.render(tplStr, { data: t }, {
-                filename: 'tpl/' + body.tplFoler + '/' + name
-            });
-        } catch (error) {
-            html = '<pre>' + error.stack + '</pre>';
-        }
+    var t = Math.floor(Math.random() * 10) * 3000;
 
-        setTimeout(function () {
-            resolve(html);
-        }, t);
-
+    try {
+        html = ejs.render(tplStr, { data: t }, {
+            filename: 'tpl/' + body.tplFoler + '/' + name
+        });
+        // html = yield render(body.tplFoler + "/" + name, { data: t });
+    } catch (error) {
+        html = '<pre>' + error.stack + '</pre>';
     }
+
+    yield sleep(t);
+
+    return html;
+
 }
 
 
