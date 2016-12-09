@@ -13,13 +13,14 @@
         function bigpipe(id, content){
             var dom = document.querySelector('component[name='+id+']');
             var el = document.createElement("div");
+            content = content.replace(/\/\//gi, '/');
+            el.innerHTML = content;//赋值以后其实objE已经具有DOM的对象了
 
-　　         el.innerHTML = content;//赋值以后其实objE已经具有DOM的对象了
-
-            dom.replaceWith(el.childNodes[0]);
+            dom.replaceWith(el);
             var sdom = document.querySelector('#componet_'+id);
             sdom.remove()
         }
     </script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.js"></script>
 </body>
 </html>
