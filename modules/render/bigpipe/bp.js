@@ -194,7 +194,7 @@ function* renderTpl(body, item, url) {
 
     if (typeof url == "string") {
         data = yield function (cb) {
-            request(url, { json: true }, function (err, res, data) {
+            request(url, { json: true ,timeout: 5000}, function (err, res, data) {
                 cb(err, data);
             });
         }
