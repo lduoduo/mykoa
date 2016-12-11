@@ -5,16 +5,23 @@ navigator.getUserMedia = navigator.getUserMedia ||
     navigator.mozGetUserMedia ||
     navigator.msGetUserMedia;
 
-window.AudioContext = window.AudioContext || webkitAudioContext;
+var PeerConnection = (window.PeerConnection ||
+    window.webkitPeerConnection00 ||
+    window.webkitRTCPeerConnection ||
+    window.mozRTCPeerConnection);
 
+window.AudioContext = window.AudioContext || webkitAudioContext;
 var actx = new AudioContext();
+
 var canvas = document.createElement('canvas');
-canvas.width = 320;canvas.height = 240;
+canvas.width = 320; canvas.height = 240;
 var cctx = canvas.getContext('2d');
+
 var video = document.querySelector('#rtc');
 
 var constraints = {
     video: {
+
         mandatory: {
             maxWidth: 320,
             maxHeight: 240
@@ -31,19 +38,20 @@ var rtc = {
     initEvent() {
         var _this = this;
         var shots = $('#snapshot');
-        shots.addEventListener('click',(e) => {
+        shots.addEventListener('click', (e) => {
             console.log(e);
-            if(_this.stream){
-                cctx.drawImage(video,0,0);
+            if (_this.stream) {
+                cctx.drawImage(video, 0, 0);
                 $('#img').src = canvas.toDataURL('image/webp');
             }
         });
     },
+    //init local camara
     initStatus() {
         var _this = this;
         if (navigator.getUserMedia) {
             // 支持
-            navigator.getUserMedia(constraints, function(stream){
+            navigator.getUserMedia(constraints, function(stream) {
                 _this.loadStream(_this, stream);
             }, _this.err);
             _this.mstlist();
@@ -52,11 +60,29 @@ var rtc = {
             // 不支持
         }
     },
-    loadStream(ctx,stream) {
+    //init connection
+    initPeerConnection() {
+        var servers = null;
+        // Add pc1 to global scope so it's accessible from the browser console
+        window.pc1 = pc1 = new RTCPeerConnection(servers);
+
+        pc1.onicecandidate = function(e) {
+            onIceCandidate(pc1, e);
+        };
+
+        // Add pc2 to global scope so it's accessible from the browser console
+        window.pc2 = pc2 = new RTCPeerConnection(servers);
+
+        pc2.onicecandidate = function(e) {
+            onIceCandidate(pc2, e);
+        };
+
+    },
+    loadStream(ctx, stream) {
         console.log(stream);
         ctx.stream = stream;
         // var video = document.createElement('video');
-        
+
 
         if (window.URL) {
             video.src = window.URL.createObjectURL(stream);
@@ -96,6 +122,22 @@ var rtc = {
 
 rtc.init();
 
-function $(name){
-    return document.querySelector( name);
+function $(name) {
+    return document.querySelector(name);
+}
+
+function onIceCandidate(pc, event) {
+    if (event.candidate) {
+        getOtherPc(pc).addIceCandidate(
+            new RTCIceCandidate(event.candidate)
+        ).then(
+            function() {
+                onAddIceCandidateSuccess(pc);
+            },
+            function(err) {
+                onAddIceCandidateError(pc, err);
+            }
+            );
+        trace(getName(pc) + ' ICE candidate: \n' + event.candidate.candidate);
+    }
 }
