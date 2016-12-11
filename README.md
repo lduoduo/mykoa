@@ -1,14 +1,16 @@
-# mykoa
-my koa frameworks for my own projects, trying to make a fully adapted productive frameworks
+## monitor
+> front-end monitor about error log and performance. collect from page js, send to server db.
+> owners can do analysis based on the collected data.
 
-now begin...
+### 1. error log
 
-make it little by little, branch by branch, master branch always be the latest one with all features.
-if you want to learn from start.
+### 2. performance log
 
-follow the orders below.
 
-### branches info
+
+## references
+
+## all branches info
 
 + `master` [back to master](https://github.com/lduoduo/mykoa)
  > ##### always be the latest branch merged with all other branches.
