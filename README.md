@@ -1,6 +1,6 @@
 
 ## enable https server in nodejs with self-signed certificate
-### how to create a self-signed certificate
+### 1. how to create a self-signed certificate
 `step 1` download openssl client
  [win click here](http://slproweb.com/products/Win32OpenSSL.html)
  > for OSX no need to download, just run commands in your terminal
@@ -39,7 +39,7 @@
 ```
 `step 4` start your server and test
 
-### references
+### 2. references
  + [http://www.akadia.com/services/ssh_test_certificate.html](http://www.akadia.com/services/ssh_test_certificate.html)
 
 
