@@ -33,11 +33,44 @@ follow the orders below.
  > ##### enable https connection use self signed certificate
 
 
- ### how to create a self-signed certificate
- `step 1` download openssl client
+### how to create a self-signed certificate
+`step 1` download openssl client
  [win click here](http://slproweb.com/products/Win32OpenSSL.html)
  > for OSX no need to download, just run commands in your terminal
 
+`step 2` run commands to generate the certificate
++ Generate a Private Key
+ > openssl genrsa -des3 -out server.key 1024
+
++ Generate a CSR (Certificate Signing Request)
+ > openssl req -new -key server.key -out server.csr
+
++ Remove Passphrase from Key
+ > cp server.key server.key.org
+ > openssl rsa -in server.key.org -out server.key
+
++ Generating a Self-Signed Certificate
+ > openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+
+`step 3` import certificate into nodejs
+``` javascript
+    var https = require('https');
+    var koa = require('koa');
+    var app = koa();
+
+    //https option
+    var options = {
+        key: fs.readFileSync('keys/server.key'),
+        cert: fs.readFileSync('keys/server.crt'),
+    };
+
+    //https
+    https.createServer(options, app.callback()).listen(config.staticPorts, function () {
+        console.log('static https on ' + config.staticPorts);
+    });
+
+```
+`step 4` start your server and test
 
  ### references
- []
+ + [http://www.akadia.com/services/ssh_test_certificate.html](http://www.akadia.com/services/ssh_test_certificate.html)

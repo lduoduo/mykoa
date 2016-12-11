@@ -36,7 +36,6 @@ function success(stream) {
         console.log("VideoTracks", stream.getVideoTracks());
     };
 
-    document.body.appendChild(video);
 }
 function err(e) {
     console.log('err:' + e);

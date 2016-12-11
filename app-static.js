@@ -28,7 +28,7 @@ module.exports = function () {
 
         app.use(cors());
 
-        app.use(enforceHttps(options));
+        // app.use(enforceHttps(options));
 
         /** static file folder */
         app.use(statics(__dirname + '/public/app/dest/'));
