@@ -76,8 +76,8 @@
 
             window.ajax =  {
                 json       : new Ajax('get'),
-                jsonp      : new Ajax('get'),
-                post       : new Ajax('post','jsonp'),
+                jsonp      : new Ajax('get','jsonp'),
+                post       : new Ajax('post'),
                 postp      : new Ajax('post','jsonp')
             };
         })();
@@ -95,7 +95,7 @@
                     "出错行号：" + lineNumber + "</br>" +
                     "出错列号：" + columnNumber + "</br>" +
                     "错误详情：" + errorObj + "</br></br>";
-            // alert(JSON.stringify(info));
+            alert(JSON.stringify(info));
             ERROR.log = info;
             // alert(JSON.stringify(ERROR));
             // ajax.postp(monitorUrl, ERROR, null, function(e){
@@ -103,7 +103,7 @@
             // });
 
             try{
-                ajax.postp(monitorUrl1, ERROR);
+                ajax.post('/data/updateLog', ERROR);
             }catch(e){
                 // console.log(e.stack);
                 alert(JSON.stringify(e));
@@ -122,7 +122,7 @@
             sdom.remove()
         }
         
-        ajax.postp(monitorUrl, ERROR, function(){
+        ajax.post('/data/updateLog', ERROR, function(){
             alert('sended');
         },function(e){
             alert(e.stack);

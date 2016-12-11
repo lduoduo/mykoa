@@ -1,7 +1,10 @@
 'use strict';
-var https = require('https');
+
 var koa = require('koa');
 var app = koa();
+
+var http = require('http');
+var https = require('https');
 
 var fs = require('fs');
 
@@ -9,7 +12,7 @@ var co = require('co');
 var session = require('koa-session');
 var compose = require('koa-compose');
 
-var enforceHttps = require('koa-sslify');
+// var enforceHttps = require('koa-sslify');
 
 var config = require('./config');
 var modules = require('./modules');
@@ -18,38 +21,38 @@ var service = require('./service');
 
 //session config
 var CONFIG = {
-  key: 'koa:sess', /** (string) cookie key (default is koa:sess) */
-  maxAge: 86400000, /** (number) maxAge in ms (default is 1 days) */
-  overwrite: true, /** (boolean) can overwrite or not (default true) */
-  httpOnly: true, /** (boolean) httpOnly or not (default true) */
-  signed: true, /** (boolean) signed or not (default true) */
+	key: 'koa:sess', /** (string) cookie key (default is koa:sess) */
+	maxAge: 86400000, /** (number) maxAge in ms (default is 1 days) */
+	overwrite: true, /** (boolean) can overwrite or not (default true) */
+	httpOnly: true, /** (boolean) httpOnly or not (default true) */
+	signed: true, /** (boolean) signed or not (default true) */
 };
 
 //https option
 var options = {
-    key: fs.readFileSync('keys/server.key'),
-    cert: fs.readFileSync('keys/server.crt'),
-    port: 8081
+	key: fs.readFileSync('keys/server.key'),
+	cert: fs.readFileSync('keys/server.crt'),
+	port: 8081
 };
 
-module.exports = function(){
+module.exports = function () {
 	Promise.all([
 
 		co(start)
 
-	]).catch(function(e){
+	]).catch(function (e) {
 
-		console.log('err:'+e.stack);
+		console.log('err:' + e.stack);
 
 	});
 };
 
-function* start(){
+function* start() {
 	var ver = require('./package.json').version;
 
 	var mw = compose([
-		/** force to use https on all pages */
-		enforceHttps(options),
+		/** force to redirect to https on all pages */
+		// enforceHttps(options),
 		/** control internal error */
 		service['500'],
 		/** send response time to browser */
@@ -57,7 +60,7 @@ function* start(){
 		/** send version of server to browser */
 		modules.version(ver),
 		/** init session storage */
-		session(CONFIG,app),
+		session(CONFIG, app),
 		/** init local route */
 		routers.start(),
 		/** handle all 404 errors */
@@ -68,17 +71,22 @@ function* start(){
 
 	// app.use(service['404']);
 
-	app.listen(config.serverPort);
+	// app.listen(config.serverPort);
+
+	//http server
+	http.createServer(app.callback()).listen(config.serverPort, function () {
+		console.log('server http on ' + config.serverPort);
+	});
 
 	//https
-	https.createServer(options, app.callback()).listen(config.serverPorts, function(){
-		console.log('server https on '+ config.serverPorts);
+	https.createServer(options, app.callback()).listen(config.serverPorts, function () {
+		console.log('server https on ' + config.serverPorts);
 	});
 
-	app.on('error',function(err,ctx){
-		console.log('err:'+err.stack);
+	app.on('error', function (err, ctx) {
+		console.log('err:' + err.stack);
 	});
 
-	console.log('server on '+ config.serverPort);
+	console.log('server on ' + config.serverPort);
 
 }

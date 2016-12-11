@@ -3,7 +3,7 @@
 
 module.exports = {
     test: require('./test'),
-    aa: require('./aa'),
+    data: require('./data'),
     '404':require('./404'),
     '500':require('./500')
 }
