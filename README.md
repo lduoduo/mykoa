@@ -1,5 +1,6 @@
 ## monitor
 > front-end monitor about error log and performance. collect from page js, send to server db.
+
 > owners can do analysis based on the collected data.
 
 ### 1. error log

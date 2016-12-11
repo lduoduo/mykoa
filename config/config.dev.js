@@ -5,6 +5,8 @@ const os = require('os');
 module.exports = class Config {
     constructor() {
 
+        /** 项目名称 */
+        this.appName = 'mykoa';
         /*当前站点环境*/
         this.env = 'dev';
         /** 本地ip */
@@ -29,8 +31,8 @@ module.exports = class Config {
         this.rootPath = '/koa';
         /*数据库接口地址*/
         // this.interUrl = "http://10.14.91.132:8090/nodeapi/";
-        this.interUrl = 'http://localhost:9999/nodeapi/';
-
+        this.interUrl = 'http://' + this.ip + ':9998/nodeapi/';
+        this.monitorUrl = '//' + this.ip + ':9999/updateLog';
     }
 }
 
@@ -38,7 +40,7 @@ module.exports = class Config {
 function getLocalIps(flagIpv6) {
     var ifaces = os.networkInterfaces();
     var ips = [];
-    var func = function(details) {
+    var func = function (details) {
         if (!flagIpv6 && details.family === 'IPv6') {
             return;
         }
