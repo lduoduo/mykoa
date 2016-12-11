@@ -31,9 +31,27 @@
     <!--<link rel="stylesheet" href="<= staticPaths.css %>">-->
 
     <title>web rtc demo</title>
-    <video src="" id='rtc'></video>
+    <style>
+        .btn{
+            font-size: 18px;
+            background: red;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .img{
+            width: 320px;
+            height: 240px;
+            background: lightgreen;  
+        }
+    </style>
 </head>
 <body>
+    <video src="" id='rtc'></video>
+    <a class="btn" id='snapshot'>snapshot</a>
+    <img id="img" class="img">
+    <script>
+        // $ = document.querySelectorAll.bind(this, arguments);
+    </script>
     <script src="../js/webrtc.js"></script>
 </body>
 </html>
