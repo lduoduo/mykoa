@@ -1,11 +1,15 @@
 'use strict';
-
+var https = require('https');
 var koa = require('koa');
 var app = koa();
+
+var fs = require('fs');
 
 var co = require('co');
 var session = require('koa-session');
 var compose = require('koa-compose');
+
+var enforceHttps = require('koa-sslify');
 
 var config = require('./config');
 var modules = require('./modules');
@@ -21,38 +25,12 @@ var CONFIG = {
   signed: true, /** (boolean) signed or not (default true) */
 };
 
-
-// //x-response-time
-// app.use(function* (next) {
-// 	const start = new Date();
-// 	console.log('line 1 start:' + start);
-
-// 	yield next;
-// 	const ms = new Date() - start;
-// 	console.log('line 5 start:' + start);
-
-// 	this.set('X-response-time', `${ms}ms`);
-
-// });
-
-// //log time
-// app.use(function* (next) {
-// 	const start = new Date();
-// 	console.log('line 2 start:' + start);
-
-// 	yield next;
-// 	const ms = new Date() - start;
-// 	console.log('line 4 start:' + start);
-
-// 	console.log('%s %s : %s ms', this.method, this.url, ms);
-
-// });
-
-// //response
-// app.use(function* (next) {
-// 	console.log('line 3');
-// 	this.body = 'hello dd';
-// });
+//https option
+var options = {
+    key: fs.readFileSync('keys/server.key'),
+    cert: fs.readFileSync('keys/server.crt'),
+    port: 8081
+};
 
 module.exports = function(){
 	Promise.all([
@@ -70,6 +48,8 @@ function* start(){
 	var ver = require('./package.json').version;
 
 	var mw = compose([
+		/** force to use https on all pages */
+		enforceHttps(options),
 		/** control internal error */
 		service['500'],
 		/** send response time to browser */
@@ -89,6 +69,11 @@ function* start(){
 	// app.use(service['404']);
 
 	app.listen(config.serverPort);
+
+	//https
+	https.createServer(options, app.callback()).listen(config.serverPorts, function(){
+		console.log('server https on '+ config.serverPorts);
+	});
 
 	app.on('error',function(err,ctx){
 		console.log('err:'+err.stack);

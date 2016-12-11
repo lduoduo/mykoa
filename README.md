@@ -31,3 +31,13 @@ follow the orders below.
 
 + `https` [20161211](https://github.com/lduoduo/mykoa/tree/https)
  > ##### enable https connection use self signed certificate
+
+
+ ### how to create a self-signed certificate
+ `step 1` download openssl client
+ [win click here](http://slproweb.com/products/Win32OpenSSL.html)
+ > for OSX no need to download, just run commands in your terminal
+
+
+ ### references
+ []
