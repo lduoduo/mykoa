@@ -28,3 +28,6 @@ follow the orders below.
 
 + `webRTC` [20161211](https://github.com/lduoduo/mykoa/tree/webRTC)
  > ##### demos learning web real time communication
+
+ + `https` [20161211](https://github.com/lduoduo/mykoa/tree/https)
+ > ##### enable https connection use self signed certificate
