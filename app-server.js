@@ -11,6 +11,7 @@ var fs = require('fs');
 var co = require('co');
 var session = require('koa-session');
 var compose = require('koa-compose');
+var body = require('koa-body');
 
 // var enforceHttps = require('koa-sslify');
 
@@ -67,6 +68,7 @@ function* start() {
 		service['404']
 	]);
 
+	app.use(body());
 	app.use(modules.urlFilter(mw));
 
 	// app.use(service['404']);
@@ -87,6 +89,6 @@ function* start() {
 		console.log('err:' + err.stack);
 	});
 
-	console.log('server on ' + config.serverPort);
+	// console.log('server on ' + config.serverPort);
 
 }

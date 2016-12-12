@@ -32,7 +32,8 @@ module.exports = class Config {
         /*数据库接口地址*/
         // this.interUrl = "http://10.14.91.132:8090/nodeapi/";
         this.interUrl = 'http://' + this.ip + ':9998/nodeapi/';
-        this.monitorUrl = '//' + this.ip + ':9999/updateLog';
+        // this.monitorUrl = '//' + this.ip + ':9999/updateLog';
+        this.monitorUrl  = '//' + this.ip + ':9998/';
     }
 }
 
