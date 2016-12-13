@@ -35,5 +35,5 @@ follow the orders below.
 + `monitor` [20161211](https://github.com/lduoduo/mykoa/tree/monitor)
  > ##### front-end error/performance monitor data collector
 
-+ `web socket` [20161213](https://github.com/lduoduo/mykoa/tree/websocket)
++ `websocket` [20161213](https://github.com/lduoduo/mykoa/tree/websocket)
  > ##### a web socket demo.
