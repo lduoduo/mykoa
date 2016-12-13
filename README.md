@@ -12,6 +12,12 @@
 + RTCDataChannel || webkitRTCPeerConnection
  > transfer data between browsers
 
+### 2. getUserMedia and display as video
+### 3. how to make a connection between browsers?
+### 4. how to join and leave the coversation
+### 5. take screen shot and send
+
+
 ## references
 [google ppt](http://io13webrtc.appspot.com/#1)
 
