@@ -9,29 +9,31 @@ module.exports = class Config {
         this.appName = 'mykoa';
         /*当前站点环境*/
         this.env = 'dev';
-        /** 本地ip */
+        /** local ip */
         this.ip = getLocalIps()[0];
-        /*站点的端口*/
+        /* port no of server*/
         this.serverPort = 8080;
+        /* port no of static server*/
+        this.staticPort = 8090;
+        /* url of static files*/
         /*站点的https端口*/
         this.serverPorts = 8081;
-        /*本地静态资源的端口*/
-        this.staticPort = 8090;
         /*本地静态资源的端口*/
         this.staticPorts = 8091;
         /*站点引用静态资源的地址*/
         this.frontURL =
             {
-                js: this.ip + this.staticPort + '/dest/js/',
-                css: this.ip + this.staticPort + '/dest/css/'
+                js: '//' + this.ip + ':' + this.staticPort + '/js/',
+                css: '//' + this.ip + ':' + this.staticPort + '/css/'
             };
-        /*域名*/
+        /* domain */
         this.domain = 'gooddogdesign.com';
-        /*路由虚拟目录*/
+        /* route rootpath */
         this.rootPath = '/koa';
-        /*数据库接口地址*/
+        /* db url */
         // this.interUrl = "http://10.14.91.132:8090/nodeapi/";
-        this.interUrl = 'http://' + this.ip + ':9998/nodeapi/';
+        this.interUrl = 'http://' + this.ip + ':9999/nodeapi/';
+
         // this.monitorUrl = '//' + this.ip + ':9999/updateLog';
         this.monitorUrl  = '//' + this.ip + ':9998/';
     }
