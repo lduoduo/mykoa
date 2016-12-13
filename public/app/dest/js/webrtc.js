@@ -37,14 +37,21 @@ var rtc = {
     },
     initEvent() {
         var _this = this;
-        var shots = $('#snapshot');
-        shots.addEventListener('click', (e) => {
+        // var shots = $('#snapshot')[0];
+        $('body').on('click', '#snapshot', (e) => {
             console.log(e);
             if (_this.stream) {
                 cctx.drawImage(video, 0, 0);
-                $('#img').src = canvas.toDataURL('image/webp');
+                $('#img')[0].src = canvas.toDataURL('image/webp');
             }
-        });
+        })
+        // shots.addEventListener('click', (e) => {
+        //     console.log(e);
+        //     if (_this.stream) {
+        //         cctx.drawImage(video, 0, 0);
+        //         $('#img').src = canvas.toDataURL('image/webp');
+        //     }
+        // });
     },
     //init local camara
     initStatus() {
@@ -122,9 +129,9 @@ var rtc = {
 
 rtc.init();
 
-function $(name) {
-    return document.querySelector(name);
-}
+// function $(name) {
+//     return document.querySelector(name);
+// }
 
 function onIceCandidate(pc, event) {
     if (event.candidate) {

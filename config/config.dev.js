@@ -10,7 +10,7 @@ module.exports = class Config {
         /*当前站点环境*/
         this.env = 'dev';
         /** local ip */
-        this.ip = getLocalIps()[0];
+        this.ip = getLocalIps()[1];
         /* port no of server*/
         this.serverPort = 8080;
         /* port no of static server*/
@@ -21,20 +21,11 @@ module.exports = class Config {
         /*本地静态资源的端口*/
         this.staticPorts = 8091;
         /*站点引用静态资源的地址*/
-<<<<<<< HEAD
         this.frontURL = {
-            js: this.ip + this.staticPort + '/dest/js/',
-            css: this.ip + this.staticPort + '/dest/css/'
+            js: 'https://' + this.ip + ':' + this.staticPorts + '/js/',
+            css: 'https://' + this.ip + ':' + this.staticPorts + '/css/'
         };
-        /*域名*/
-=======
-        this.frontURL =
-            {
-                js: '//' + this.ip + ':' + this.staticPort + '/js/',
-                css: '//' + this.ip + ':' + this.staticPort + '/css/'
-            };
         /* domain */
->>>>>>> master
         this.domain = 'gooddogdesign.com';
         /* route rootpath */
         this.rootPath = '/koa';

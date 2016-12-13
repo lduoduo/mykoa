@@ -31,7 +31,6 @@
     <link rel="stylesheet" href="<%- pageCss %>">
 
     <title><%= title %></title>
-    <script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
 
     <script type="text/javascript">
         var appName = '<%= config.appName %>'
@@ -41,9 +40,10 @@
         var environment = catcherEnvironment;
         var pre_url = environment == 'test' ? '<%= config.rootPath %>' : '/koa';
         var pre_interurl = '<%= config.interUrl %>';  
-        var monitorUrl = '<%= config.monitorUrl %>'
+        var monitorUrl = '<%= config.monitorUrl %>';
+        var frontUrl = '<%= config.frontURL %>';
     </script>
-    <script src="//localhost:8090/js/header.js"></script>
+    <script src="<%- config.frontURL.js %>header.js"></script>
 </head>
 <body class="<%= state.bodyClass %>" onselectstart="return false;">
     <!-- 公共页头部  -->
