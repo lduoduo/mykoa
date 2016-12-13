@@ -31,6 +31,7 @@ module.exports = function () {
         // app.use(enforceHttps(options));
 
         /** static file folder */
+
         app.use(statics(__dirname + '/public/app/dest/'));
 
         app.listen(staticPort);
