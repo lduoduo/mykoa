@@ -5,15 +5,20 @@
 ### 1. three base APIS
 + navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
  > currently get local user video or audio media as stream
+
 + RTCPeerConnection || webkitRTCPeerConnection || mozRTCPeerConnection
  > init peer to peer connection, this need connect to server first to build connection 
+
 + RTCDataChannel || webkitRTCPeerConnection
  > transfer data between browsers
 
 ## references
 [google ppt](http://io13webrtc.appspot.com/#1)
+
 [Real time communication with WebRTC](https://codelabs.developers.google.com/codelabs/webrtc-web/#3)
+
 [通过WebRTC实现实时视频通信（一)](https://www.oschina.net/question/156697_172887)
+
 [使用WebRTC搭建前端视频聊天室——入门篇](https://segmentfault.com/a/1190000000436544)
 
 ## all branches info
