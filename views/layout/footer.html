@@ -7,21 +7,10 @@
 
     <!--component render-->
 
-    <!-- basic js-->
-    <script src="<%- '//' + config.ip + ':8090/js/zdodo.js' %>"></script>
-
     <!--page js-->
     <script src="<%- pageJs %>"></script>
-
-    <script>
-        function bigpipe(id, content){
-            var dom = document.querySelector('component[name='+id+']');
-            var el = document.createElement("div");
-　　         el.innerHTML = content;//赋值以后其实el已经具有DOM的对象了
-            dom.replaceWith(el);
-            var sdom = document.querySelector('#componet_'+id);
-            sdom.remove()
-        }
-    </script>
+    
+    <!--<- staticPaths.js %>-->
+    <script src="//localhost:8090/js/footer.js"></script>
 </body>
 </html>

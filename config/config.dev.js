@@ -5,7 +5,9 @@ const os = require('os');
 module.exports = class Config {
     constructor() {
 
-        /* current enviroment*/
+        /** 项目名称 */
+        this.appName = 'mykoa';
+        /*当前站点环境*/
         this.env = 'dev';
         /** local ip */
         this.ip = getLocalIps()[0];
@@ -14,6 +16,11 @@ module.exports = class Config {
         /* port no of static server*/
         this.staticPort = 8090;
         /* url of static files*/
+        /*站点的https端口*/
+        this.serverPorts = 8081;
+        /*本地静态资源的端口*/
+        this.staticPorts = 8091;
+        /*站点引用静态资源的地址*/
         this.frontURL =
             {
                 js: '//' + this.ip + ':' + this.staticPort + '/js/',
@@ -27,6 +34,8 @@ module.exports = class Config {
         // this.interUrl = "http://10.14.91.132:8090/nodeapi/";
         this.interUrl = 'http://' + this.ip + ':9999/nodeapi/';
 
+        // this.monitorUrl = '//' + this.ip + ':9999/updateLog';
+        this.monitorUrl  = '//' + this.ip + ':9998/';
     }
 }
 

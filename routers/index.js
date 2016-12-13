@@ -9,9 +9,12 @@ var service = require('../service');
 exports.start = function () {
     var rootPath = config.rootPath;
     return compose([
+
+        //post data
+        route.post(/\/data\/\w+/, service.data.index),
+
         //page test
         route.get(rootPath + '/test', service.test.index),
-        //page aa
-        route.get(rootPath + '/aa', service.aa.index),
+        
     ]);
 }
