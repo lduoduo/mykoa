@@ -33,15 +33,18 @@
     <title><%= title %></title>
 
     <script type="text/javascript">
-        var appName = '<%= config.appName %>'
-        var pageName = '<%= pageName %>' || window.location.href;
-        var platform = "h5";
-        var catcherEnvironment = '<%= config.environment %>';
-        var environment = catcherEnvironment;
-        var pre_url = environment == 'test' ? '<%= config.rootPath %>' : '/koa';
-        var pre_interurl = '<%= config.interUrl %>';  
-        var monitorUrl = '<%= config.monitorUrl %>';
-        var frontUrl = '<%= config.frontURL %>';
+        var MY = {
+            appName: '<%= config.appName %>',
+            pageName: '<%= pageName %>' || window.location.href,
+            platform: "h5",
+            environment: '<%= config.environment %>',
+            pre_url: '/koa',
+            pre_interurl: '<%= config.interUrl %>',  
+            monitorUrl: '<%= config.monitorUrl %>',
+            frontUrl: '<%= config.frontURL %>',
+            ioPort: '<%= config.socketPorts%>'
+        }
+        
     </script>
     <script src="<%- config.frontURL.js %>header.js"></script>
 </head>

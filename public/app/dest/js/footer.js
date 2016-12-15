@@ -8,5 +8,6 @@ window.onload = function () {
         "\n总: " + (tmp.loadEventStart - tmp.fetchStart) + "ms";
     ERROR.logtype = "performance";
     ERROR.log = perf;
-    ajax.post('/data/updateLog', ERROR);
+    // alert(JSON.stringify(perf));
+    // ajax.post('/data/updateLog', ERROR);
 }

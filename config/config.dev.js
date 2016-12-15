@@ -20,6 +20,8 @@ module.exports = class Config {
         this.serverPorts = 8081;
         /*本地静态资源的端口*/
         this.staticPorts = 8091;
+        /** socket服务器的地址 */
+        this.socketPorts = 8099;
         /*站点引用静态资源的地址*/
         this.frontURL = {
             js: 'https://' + this.ip + ':' + this.staticPorts + '/js/',
