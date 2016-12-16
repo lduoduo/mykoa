@@ -21,7 +21,11 @@ var room = {};
 io.on('connection', function (sockets) {
     var roomId = "my";
     var user = {};
-    var tmp = room[roomId] = {};
+    if(!room[roomId]){
+        room[roomId] = {};
+    }
+    var tmp = room[roomId];
+
     sockets.on('join', function (userinfo) {
         // if(userinfo && userinfo.id && userinfo.name){
         //     user = userinfo;
@@ -31,13 +35,20 @@ io.on('connection', function (sockets) {
         var id = "000" + Math.floor(Math.random() * 1000);
         id = id.slice(-5); id = id.replace('0', 'a');
         user.id = id;
-        user.name = (userinfo && userinfo.name) || user.id;
+        user.name = id;
+        // user.name = (userinfo && userinfo.name) || user.id;
         tmp[user.id] = user;
 
         //给自己发消息
         sockets.emit('self', 'self', user);
         // 广播向其他用户发消息
         sockets.broadcast.emit('sys', 'in', user);
+        if (Object.keys(tmp).length > 1) {
+            sockets.broadcast.emit('peer', {
+                type: 'peerStart',
+                user: user
+            });
+        }
         console.log(user.id + '加入了' + roomId);
 
         sockets.join(roomId);
@@ -55,11 +66,24 @@ io.on('connection', function (sockets) {
 
     });
 
-    sockets.on('candidate',function(data){
-        console.log(data);
-        sockets.broadcast.emit('candidate', data);
-    });
+    // sockets.on('candidate',function(data){
+    //     console.log(data);
+    //     sockets.broadcast.emit('candidate', data);
+    // });
+    // sockets.on('offer',function(data){
+    //     console.log(data);
+    //     sockets.broadcast.emit('offer', data);
+    // });
+    // sockets.on('answer',function(data){
+    //     console.log(data);
+    //     sockets.broadcast.emit('answer', data);
+    // });
 
+    /** peer管道信息传递 */
+    sockets.on('peer', function (data) {
+        // console.log(data);
+        sockets.broadcast.emit('peer', data);
+    });
 
     // 接收用户消息,发送相应的房间
     sockets.on('message', function (users, msg) {
