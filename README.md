@@ -17,6 +17,9 @@
 ### 4. how to join and leave the coversation
 ### 5. take screen shot and send
 
+### QA:
+#### 1. current only support 2 clients, otherwhiles will cause error `DOMException: Error processing ICE candidate`
+#### 2. createAnwser cant be called before SetRemoteDescription `CreateAnswer can't be called before SetRemoteDescription.`
 
 ## references
 [google ppt](http://io13webrtc.appspot.com/#1)
