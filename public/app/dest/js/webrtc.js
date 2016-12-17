@@ -1,10 +1,38 @@
 /** web rtc demo */
-
+/**
+ * 目前只支持2个client的p2p链接，即每个房间只支持2个人
+ * 角色A: 第一个进入房间的人，处于等待状态，是p2p链接发起方
+ * 角色B: 第二个进入房间的人，是配p2p链接接收方
+ * 链接步骤：
+ * 1. 角色成功加入房间(失败的时候另寻房间)
+ * 2. 初始化本地媒体流
+ *    - 检测是否有摄像头，是否支持
+ *    - 获取本地视频流, navigator.getUserMedia
+ *    - 初始化本地视频流信息, 以video标签进行渲染
+ *    - 初始化本地p2p链接信息: new RTCPeerConnection(第三方STUN服务器配置信息);
+ *    - 本地peer链接信息加入本地视频流进行渲染
+ *    - 初始化本地peer的一系列事件
+ *      - onicecandidate: 本地设置sdp时会触发, 生成保存自己的候选人信息
+ *      - 通过服务器发送 candidate 给对方
+ *      - onaddstream: 当有流过来时触发, 接收流并渲染
+ * 3. 如果房间内人数为2，服务器通知房间里的A发起p2p连接请求
+ * 4. A创建自己的链接邀请信息, 设置本地链接信息sdp, 通过服务器发送给B
+ *    - createOffer: 创建本地链接信息
+ *    - setLocalDescription: 将offer设置为本地链接信息sdp, 并且触发本地peer的onicecandidate事件
+ * 4. server转发offer链接邀请信息给B, 触发B的onOffer方法进行处理
+ *    - setRemoteDescription: 接收A的链接邀请，并设置A的描述信息, XXX.setRemoteDescription(new RTCSessionDescription(offer))
+ *    - createAnswer: 创建回应，并存储本地的回应信息, 并将回应发送给server
+ *    - setLocalDescription, 将自己的创建的answer设置为本地连接信息sdp, 触发自己的本地onicecandidate事件
+ * 5. server转发候选人信息candidate, 触发B的onNewPeer(自定义的方法)
+ *    - addIceCandidate: 将A的候选人信息加入自己本地, XXX.addIceCandidate(new RTCIceCandidate(candidate));
+ * 6. A通过server接收B发出的answer, 触发自己的onAnswer
+ *    - 设置B的描述信息, XXX.setRemoteDescription(new RTCSessionDescription(answer));
+ * 7. AB链接建立完成, 开始传输实时数据
+ */
 navigator.getUserMedia = navigator.getUserMedia ||
     navigator.webkitGetUserMedia ||
     navigator.mozGetUserMedia ||
     navigator.msGetUserMedia;
-
 
 window.AudioContext = window.AudioContext || webkitAudioContext;
 var actx = new AudioContext();
@@ -17,7 +45,7 @@ var myvideo = document.querySelector('#myrtc');
 var uvideo = document.querySelector('#urtc');
 
 var constraints = {
-    audio:true,
+    audio: true,
     video: {
 
         mandatory: {
@@ -53,27 +81,34 @@ var Mt = {
 };
 
 var local = localStorage || window.localStorage; //本地存储
-// ---------创建连接-----------
-var socket = io('https://' + window.location.hostname + ":" + MY.ioPort); //初始化启动socket
+// ---------初始化启动socket, 创建socket链接-----------
+var socket = io('https://' + window.location.hostname + ":" + MY.ioPort);
 
 //我的本地存储数据
 var my = {
+    //socket是否已经连接好，连接好后才能开启p2p连接
+    isReady: false,
     list: [],
     addedlist: [],
     //我能连接的所有人
-    connections: {},
-    stream: null//我的视频流
+    connectors: {},
+    //我自己的p2p连接信息
+    connection: {},
+    //我的音频输入设备
+    audios: [],
+    //我的视频输入设备
+    videos: [],
+    //我的视频流
+    stream: null
 };
-var myconnect = {};
 
 var rtc = {
     init: function() {
         this.initStatus();
         this.initSocket();
         this.join();
-
         this.initEvent();
-        this.initMedia();
+
     },
     initEvent: function() {
         var _this = this;
@@ -84,7 +119,8 @@ var rtc = {
                 cctx.drawImage(myvideo, 0, 0);
                 $('#img')[0].src = canvas.toDataURL('image/webp');
             }
-        })
+        });
+
         // shots.addEventListener('click', (e) => {
         //     console.log(e);
         //     if (_this.stream) {
@@ -93,11 +129,10 @@ var rtc = {
         //     }
         // });
     },
-    //init local camara
+    //init local data
     initStatus: function() {
         my.info = JSON.parse(local.getItem('myinfo') || null);
     },
-
     //初始化socket的各种监听事件
     initSocket: function() {
         var _ = this;
@@ -107,13 +142,11 @@ var rtc = {
         });
         // 监听消息
         socket.on('msg', function(user, msg) {
-            // s.showMsg(user, msg);
             console.log(msg);
         });
 
         // 监听系统消息
         socket.on('sys', function(sysMsg, data) {
-
             if (sysMsg == "in") {
                 // console.log(data);
                 Mt.alert({
@@ -130,15 +163,28 @@ var rtc = {
 
         // 监听自己的消息
         socket.on('self', function(sysMsg, data) {
-            console.log('my');
+            //要加入的房间已满，重新选择房间
+            if (sysMsg == 'error') {
+                Mt.alert({
+                    title: data,
+                    confirmBtnMsg: '好',
+                    cb: function() {
+                        var id = Math.floor(Math.random() * 1000);
+                        window.location.href = window.location.href.replace(/roomid=\w+/, 'roomid=' + id);
+                    }
+                });
+                return;
+            }
+            my.isReady = true;
             local.setItem('myinfo', JSON.stringify(data));
             my.info = data;
-            console.log(data);
+            console.log('欢迎您加入');
+            _.mstlist();
+            _.initMedia();
         });
 
         /** 和peer有关的监听 */
         socket.on('peer', function(data) {
-
             console.log(data);
             switch (data.type) {
                 case "candidate": _.onNewPeer(data.data); break;
@@ -149,11 +195,11 @@ var rtc = {
         });
 
     },
-    //发送消息
+    //发送文字消息
     sendMsg: function(msg) {
         socket.send(my.info, msg);
     },
-    //发送链接请求
+    //p2p连接的消息传递
     send: function(type, data) {
         socket.emit('peer', {
             type: type,
@@ -167,7 +213,7 @@ var rtc = {
     leave: function() {
         socket.emit('leave');
     },
-    //join 房间
+    //加入房间
     join: function() {
         socket.emit('join', my.info);
     },
@@ -208,40 +254,42 @@ var rtc = {
             }]
         };
         //创建PeerConnection实例
-        myconnect = new RTCPeerConnection(iceServer);
-        myconnect.addStream(stream);
-        myconnect.onaddstream = function(e) {
+        my.connection = new RTCPeerConnection(iceServer);
+        my.connection.addStream(stream);
+        my.connection.onaddstream = function(e) {
             console.log(e);
             // var video = document.createElement('video');
             uvideo.src = window.URL.createObjectURL(e.stream);
             // $('body').append(video);
-            // my.connections
+            // my.connectors
         };
-        /** 接收到邀请，准备处理对方的验证信息 */
-        myconnect.onicecandidate = function(e) {
+        /** 设置本地sdp后触发该事件，发送自己的candidate */
+        my.connection.onicecandidate = function(e) {
             if (e.candidate) {
                 my.candidate = e.candidate;
                 _.send('candidate', e.candidate);
             }
         };
+        //做好连接准备后，发送消息给服务器，通知对方发送P2P连接邀请
+        _.send('ready', my.info);
     },
     /** 将对方加入自己的候选者中 */
     onNewPeer: function(data) {
         var candidate = data.data;
-        myconnect.addIceCandidate(new RTCIceCandidate(candidate));
+        my.connection.addIceCandidate(new RTCIceCandidate(candidate));
 
         //增加一个元素
-        // my.connections = document.createElement('video');
+        // my.connectors = document.createElement('video');
         // $('body').append(video);
     },
     /** 接收链接邀请，发出响应 */
     onOffer: function(data) {
         var _ = this;
         var offer = data.data;
-        my.connections[data.user.id] = data.user.name;
-        myconnect.setRemoteDescription(new RTCSessionDescription(offer), function() {
-            myconnect.createAnswer(function(_answer) {
-                myconnect.setLocalDescription(_answer);
+        my.connectors[data.user.id] = data.user.name;
+        my.connection.setRemoteDescription(new RTCSessionDescription(offer), function() {
+            my.connection.createAnswer(function(_answer) {
+                my.connection.setLocalDescription(_answer);
                 _.send('answer', _answer);
             }, function(err) {
                 console.log('An error occur on onOffer.' + err);
@@ -251,24 +299,24 @@ var rtc = {
     /** 接收响应，设置远程的peer session */
     onAnswer: function(data) {
         var answer = data.data;
-        myconnect.setRemoteDescription(new RTCSessionDescription(answer));
+        my.connection.setRemoteDescription(new RTCSessionDescription(answer));
     },
     /** 对方离开，断开链接 */
     onLeave: function(user) {
-        delete my.connections[user.id];
-        myconnect.close();
-        myconnect.onicecandidate = null;
-        myconnect.onaddstream = null;
+        delete my.connectors[user.id];
+        my.connection.close();
+        my.connection.onicecandidate = null;
+        my.connection.onaddstream = null;
         this.setupPeerConnection(my.stream);
     },
     /** 开始连接, 发出链接邀请 */
     startPeerConnection: function() {
         var _ = this;
-        myconnect.createOffer(function(_offer) {
+        my.connection.createOffer(function(_offer) {
             my.offer = _offer;
             console.log('offer:' + JSON.stringify(_offer));
             _.send('offer', _offer);
-            myconnect.setLocalDescription(_offer);
+            my.connection.setLocalDescription(_offer);
         }, function(error) {
             Mt.alert({
                 title: "An error on startPeerConnection:" + error,
@@ -307,14 +355,53 @@ var rtc = {
     },
     //获取摄像头和麦克风的列表
     mstlist: function() {
+        var _=this;
+        if (typeof MediaStreamTrack === "undefined") {
+            Mt.alert({
+                type: 'error',
+                title: '当前设备不支持视频功能',
+                timer: 2000
+            });
+            return;
+        }
         MediaStreamTrack.getSources(function(sourceInfo) {
-            var audioSource = null;
-            var videoSource = null;
-            console.log(sourceInfo);
-            // for( let i=0;i!=sourceInfo.length;i++){
-
-            // }
+            if (sourceInfo.length == 0) {
+                Mt.alert({
+                    type: 'error',
+                    title: '未找到任何视频输入设备',
+                    timer: 2000
+                });
+                return;
+            }
+            var test = "";
+            for (var i = 0; i < sourceInfo.length; i++) {
+                var tmp = sourceInfo[i];
+                if (tmp.kind == "audio") {
+                    my.audios.push(tmp);
+                }
+                if (tmp.kind == "video") {
+                    my.videos.push(tmp);
+                }
+            }
+            _.showInputs();
         });
+    },
+    //如果有多个视频音频输入，屏幕上进行展示
+    showInputs: function() {
+        var inputsEL = document.createElement('div');
+        inputsEL.className = "additional-inputs J-additional-inputs";
+        var html = "";
+        var tmp = null;
+        for (var i = 0; i < my.videos.length; i++) {
+            tmp = my.videos[i];
+            html += "<div class='item' data-id='" + tmp.id + "'>" + tmp.label + "</div>";
+        }
+        // for (var i = 0; i < my.audios.length; i++) {
+        //     tmp = my.audios[i];
+        //     html += "<div class='item' data-id='" + tmp.id + "'>" + tmp.label + "</div>";
+        // }
+        $(inputsEL).html(html);
+        $('body').append(inputsEL);
     }
 
 }

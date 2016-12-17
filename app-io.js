@@ -19,9 +19,13 @@ var io = socket(server);
 var room = {};
 
 io.on('connection', function (sockets) {
-    var roomId = "my";
+    var url = sockets.request.headers.referer;
+    if (!url) return;
+    url = url.match(/roomid=\w+/gi); url = url.length > 0 ? url[0] : null;
+    url = url ? url.replace(/roomid=/gi, '') : null;
+    var roomId = url || "my";
     var user = {};
-    if(!room[roomId]){
+    if (!room[roomId]) {
         room[roomId] = {};
     }
     var tmp = room[roomId];
@@ -32,6 +36,11 @@ io.on('connection', function (sockets) {
         //     tmp[user.id] = user;
         //     return;
         // }
+        if (Object.keys(tmp).length >= 2) {
+            //通知要连接的客户，当前房间已经满员，不能加入
+            sockets.emit('self', 'error', "当前房间已经满了，请另外选择房间");
+            return;
+        }
         var id = "000" + Math.floor(Math.random() * 1000);
         id = id.slice(-5); id = id.replace('0', 'a');
         user.id = id;
@@ -42,16 +51,14 @@ io.on('connection', function (sockets) {
         //给自己发消息
         sockets.emit('self', 'self', user);
         // 广播向其他用户发消息
-        sockets.broadcast.emit('sys', 'in', user);
-        if (Object.keys(tmp).length > 1) {
-            sockets.broadcast.emit('peer', {
-                type: 'peerStart',
-                user: user
-            });
-        }
+        // sockets.broadcast.emit('sys', 'in', user);
+        sockets.to(roomId).emit('sys', 'in', user);
+
         console.log(user.id + '加入了' + roomId);
+        console.log(room[roomId]);
 
         sockets.join(roomId);
+
     });
     sockets.on('disconnect', function () {
         // 从房间名单中移除
@@ -82,7 +89,20 @@ io.on('connection', function (sockets) {
     /** peer管道信息传递 */
     sockets.on('peer', function (data) {
         // console.log(data);
-        sockets.broadcast.emit('peer', data);
+        //接收客户端的状态信息，判断是否做好连接准备
+        if (data.type == "ready") {
+            //如果有2个人了，就发出连接命令
+            if (Object.keys(tmp).length == 2) {
+                sockets.to(roomId).emit('peer', {
+                    type: 'peerStart',
+                    user: user
+                });
+                console.log('可以开启p2p连接了');
+            }
+            return;
+        }
+        sockets.to(roomId).emit('peer', data);
+        // sockets.broadcast.emit('peer', data);
     });
 
     // 接收用户消息,发送相应的房间
@@ -91,11 +111,16 @@ io.on('connection', function (sockets) {
         if (!users || !users.id || !tmp[users.id]) {
             return false;
         }
-        // 广播向其他用户发消息
-        sockets.broadcast.emit('msg', users, msg);
-        sockets.emit('msg', users, msg);
+
         //向房间发消息
-        // io.to(roomID).emit('msg', users, msg);
+        sockets.to(roomId).emit('msg', users, msg);
+
+        // 广播向所有其他用户发消息
+        // sockets.broadcast.emit('msg', users, msg);
+
+        //回复自己
+        sockets.emit('msg', users, msg);
+
     });
 });
 
