@@ -1,12 +1,12 @@
-# mykoa
-my koa frameworks for my own projects, trying to make a fully adapted productive frameworks
+## bigpipe-request
+> render page with bigpipe and render template with request data.
 
-now begin...
+> page will send static parts immediately, then continue send html after render data with template
 
-make it little by little, branch by branch, master branch always be the latest one with all features.
-if you want to learn from start.
-
-follow the orders below.
+### start your server and test
++ start node server
++ start mock data server
++ test: http://ip:8080/koa/test
 
 ### branches info
 
