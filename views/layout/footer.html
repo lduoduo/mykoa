@@ -1,6 +1,6 @@
  
     <!-- 公共前端性能监控脚本 -->
-    <input type="hidden" id="commonMonitor" value='{"channel":"<%- config.rootPath %>","page":"<%= pageName %>", "whiteList":"10.1|localhost|sojump.com", "removeError":true}' />
+
     
     <!--公共的js-->
     <!--<- commons.js %>-->
@@ -9,6 +9,6 @@
     
     <!--本页面js-->
     <!--<- staticPaths.js %>-->
-    <script src="//localhost:8090/js/footer.js"></script>
+    <script src="<%- config.frontURL.js %>footer.js"></script>
 </body>
 </html>
