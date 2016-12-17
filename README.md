@@ -7,7 +7,7 @@
 
 ### 2. performance log
 
-### 服务启动后的测试地址
+### start your server and test
 > https://ip:8081/koa/test
 
 > http://ip:8080/koa/test
