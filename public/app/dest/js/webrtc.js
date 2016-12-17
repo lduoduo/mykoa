@@ -17,6 +17,7 @@ var myvideo = document.querySelector('#myrtc');
 var uvideo = document.querySelector('#urtc');
 
 var constraints = {
+    audio:true,
     video: {
 
         mandatory: {
