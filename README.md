@@ -22,8 +22,8 @@
 #### 1. current only support 2 clients, otherwhiles will cause error `DOMException: Error processing ICE candidate`
 #### 2. createAnwser cant be called before SetRemoteDescription `CreateAnswer can't be called before SetRemoteDescription.`
 
-### next step
-#### set up data channel
+### logs
+#### 1. add data channel, can send message now
 
 ### 服务启动后的访问链接
 
