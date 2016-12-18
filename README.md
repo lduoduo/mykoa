@@ -22,6 +22,9 @@
 #### 1. current only support 2 clients, otherwhiles will cause error `DOMException: Error processing ICE candidate`
 #### 2. createAnwser cant be called before SetRemoteDescription `CreateAnswer can't be called before SetRemoteDescription.`
 
+### next step
+#### set up data channel
+
 ### 服务启动后的访问链接
 
 > https://ip:8081/koa/webrtc?roomid=10 `roomid值任意设置`

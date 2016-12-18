@@ -13,15 +13,18 @@ var options = {
 };
 //https
 var server = https.createServer(options, app.callback());
-var io = socket(server);
+app.on('error', function(err, ctx) {
+    console.log('err:' + err.stack);
+});
 
+var io = socket(server);
 
 var room = {};
 
-io.on('connection', function (sockets) {
+io.on('connection', function(sockets) {
     var url = sockets.request.headers.referer;
-    if (!url) return;
-    url = url.match(/roomid=\w+/gi); url = url.length > 0 ? url[0] : null;
+    url = url.match(/roomid=\w+/gi);
+    url = url && url.length > 0 ? url[0] : null;
     url = url ? url.replace(/roomid=/gi, '') : null;
     var roomId = url || "my";
     var user = {};
@@ -30,7 +33,7 @@ io.on('connection', function (sockets) {
     }
     var tmp = room[roomId];
 
-    sockets.on('join', function (userinfo) {
+    sockets.on('join', function(userinfo) {
         // if(userinfo && userinfo.id && userinfo.name){
         //     user = userinfo;
         //     tmp[user.id] = user;
@@ -60,7 +63,7 @@ io.on('connection', function (sockets) {
         sockets.join(roomId);
 
     });
-    sockets.on('disconnect', function () {
+    sockets.on('disconnect', function() {
         // 从房间名单中移除
         if (user && tmp[user.id]) {
             delete tmp[user.id];
@@ -87,7 +90,7 @@ io.on('connection', function (sockets) {
     // });
 
     /** peer管道信息传递 */
-    sockets.on('peer', function (data) {
+    sockets.on('peer', function(data) {
         // console.log(data);
         //接收客户端的状态信息，判断是否做好连接准备
         if (data.type == "ready") {
@@ -106,7 +109,7 @@ io.on('connection', function (sockets) {
     });
 
     // 接收用户消息,发送相应的房间
-    sockets.on('message', function (users, msg) {
+    sockets.on('message', function(users, msg) {
         // 验证如果用户不在房间内则不给发送
         if (!users || !users.id || !tmp[users.id]) {
             return false;
@@ -124,8 +127,8 @@ io.on('connection', function (sockets) {
     });
 });
 
-module.exports = function () {
-    server.listen(config.socketPorts, function () {
+module.exports = function() {
+    server.listen(config.socketPorts, function() {
         console.log('socket server https on ' + config.socketPorts);
     });
 }
