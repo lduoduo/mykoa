@@ -8,7 +8,7 @@ module.exports = class Config {
         /** 项目名称 */
         this.appName = 'mykoa';
         /*当前站点环境*/
-        this.env = 'dev';
+        this.env = 'prd';
         /** local ip */
         this.ip = getLocalIps()[1];
         /* port no of server*/
@@ -26,8 +26,8 @@ module.exports = class Config {
         this.socketPorts = 8099;
         /*站点引用静态资源的地址*/
         this.frontURL = {
-            js: 'https://' + this.ip + ':' + this.staticPorts + '/static/js/',
-            css: 'https://' + this.ip + ':' + this.staticPorts + '/static/css/'
+            js: '/static/js/',
+            css: '/static/css/'
         };
         /* domain */
         this.domain = 'ldodo.cc';
@@ -35,10 +35,10 @@ module.exports = class Config {
         this.rootPath = '/koa';
         /* db url */
         // this.interUrl = "http://10.14.91.132:8090/nodeapi/";
-        this.interUrl = 'http://' + this.ip + ':9999/nodeapi/';
+        // this.interUrl = 'http://' + this.ip + ':9999/nodeapi/';
 
         // this.monitorUrl = '//' + this.ip + ':9999/updateLog';
-        this.monitorUrl = '//' + this.ip + ':9998/';
+        // this.monitorUrl = '//' + this.ip + ':9998/';
     }
 }
 

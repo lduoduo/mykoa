@@ -17,7 +17,7 @@ app.on('error', function(err, ctx) {
     console.log('err:' + err.stack);
 });
 
-var io = socket(server);
+var io = socket(server,{ path: '/rtcSocket' });
 
 var room = {};
 
@@ -128,8 +128,12 @@ io.on('connection', function(sockets) {
 });
 
 module.exports = function() {
+    app.listen(config.socketPort);
+
     server.listen(config.socketPorts, function() {
         console.log('socket server https on ' + config.socketPorts);
     });
+
+    console.log('socket http on ' + config.socketPort);
 }
 

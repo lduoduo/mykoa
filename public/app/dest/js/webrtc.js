@@ -80,7 +80,7 @@ var Mt = {
 
 var local = localStorage || window.localStorage; //本地存储
 // ---------初始化启动socket, 创建socket链接-----------
-var socket = io('https://' + window.location.hostname + ":" + MY.ioPort);
+var socket = io('http://192.168.31.105:8098',{path: "/rtcSocket"});
 
 //我的本地存储数据
 var my = {
