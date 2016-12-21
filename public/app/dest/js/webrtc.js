@@ -78,12 +78,12 @@ var Mt = {
     }
 };
 
-var local = localStorage || window.localStorage; //本地存储
-// ---------初始化启动socket, 创建socket链接-----------
-var socket = io('http://192.168.31.105:8098',{path: "/rtcSocket"});
-
+var search = window.location.search;
+search = search ? search.match(/roomId=\d+/gi) : "";
+search = search ? search[0].replace(/roomId=/gi, '') : "";
 //我的本地存储数据
 var my = {
+    roomId: search,
     //socket是否已经连接好，连接好后才能开启p2p连接
     isReady: false,
     list: [],
@@ -99,6 +99,13 @@ var my = {
     //我的视频流
     stream: null
 };
+
+var local = localStorage || window.localStorage; //本地存储
+// ---------初始化启动socket, 创建socket链接-----------
+// var socket = io('https://192.168.31.105:8098',{path: "/rtcSocket",query: 'roomId=' + my.roomId});
+var socket = io.connect({ path: "/rtcSocket", query: 'roomId=' + my.roomId, "transports": ['websocket'] });
+
+
 
 var rtc = {
     init: function () {
@@ -318,7 +325,7 @@ var rtc = {
     },
     /** 消息接收处理 */
     onDataChannel: function () {
-        var _=this;
+        var _ = this;
         my.dataChannel.onopen = function () {
             console.log('dataChannel opened');
         };
