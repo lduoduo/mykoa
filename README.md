@@ -24,6 +24,10 @@
 
 ### logs
 #### 1. add data channel, can send message now
+#### 2. add different files for both dev/production enviroment.!
+> dev: change the value to 'dev' in file config>env.js
+
+> production: change the value to 'prd' in file config>env.js
 
 ### 服务启动后的访问链接
 
