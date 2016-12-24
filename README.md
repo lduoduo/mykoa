@@ -35,3 +35,5 @@ follow the orders below.
 + `monitor` [20161211](https://github.com/lduoduo/mykoa/tree/monitor)
  > ##### front-end error/performance monitor data collector
 
++ `canvas` [20161224](https://github.com/lduoduo/mykoa/tree/canvas)
+ > ##### canvas pic demo
