@@ -102,8 +102,8 @@ var my = {
 
 var local = localStorage || window.localStorage; //本地存储
 // ---------初始化启动socket, 创建socket链接-----------
-// var socket = io('https://192.168.31.105:8098',{path: "/rtcSocket",query: 'roomId=' + my.roomId});
-var socket = io.connect({ path: "/rtcSocket", query: 'roomId=' + my.roomId, "transports": ['websocket'] });
+var socket = io('https://192.168.31.105:8098',{path: "/rtcSocket",query: 'roomId=' + my.roomId});
+// var socket = io.connect({ path: "/rtcSocket", query: 'roomId=' + my.roomId, "transports": ['websocket'] });
 
 
 

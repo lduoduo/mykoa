@@ -1,4 +1,4 @@
-/** service logic control of data interface */
+/** post data for monitor */
 'use strict';
 var request = require('request');
 var config = require('../config');
