@@ -15,6 +15,7 @@ exports.start = function () {
 
         //page test
         route.get(rootPath + '/test', service.test.index),
+        route.get(rootPath + '/webrtc', service.webrtc.index),
         
     ]);
 }

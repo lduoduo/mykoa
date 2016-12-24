@@ -6,6 +6,10 @@ var app = koa();
 var fs = require('fs');
 
 var statics = require('koa-static');
+var mount = require('koa-mount');
+// var serve = require('koa-serve');
+
+var a = koa();
 /** Access-Control-Allow-Origin */
 var cors = require('koa-cors');
 
@@ -24,15 +28,18 @@ var options = {
 
 module.exports = function () {
 
-    if (env == 'dev') {
+    if (env) {
 
         app.use(cors());
 
         // app.use(enforceHttps(options));
 
         /** static file folder */
-
-        app.use(statics(__dirname + '/public/app/dest/'));
+        // app.use(serve('/static', __dirname + '/public/app/dest/'));
+        // app.use(mount('/static', statics(__dirname + '/public/app/dest/')));
+        a.use(statics(__dirname + '/public/app/dest/'));
+        app.use(mount('/static', a));
+        // app.use(statics(__dirname + '/public/app/dest/'));
 
         app.listen(staticPort);
 

@@ -1,14 +1,11 @@
 #### this document keeps all problems during my develop on this framework
 
-+ `2016-1203` why 404 not work when request wrong page? 
- > ##### only when put service['404'] into compose together with others can work...why?
++ `2016-1218` webrtc.js:138 Uncaught DOMException: Failed to execute 'send' on 'RTCDataChannel': RTCDataChannel.readyState is not 'open'(…)
+> remove RtpDataChannels option when creating RTCPeerConnection
 
-+ `2016-1204` TypeError: Invalid non-string/buffer chunk at Object.module.exports.Readable.render 
- > ##### should use yield...
++ `2016-1218` no errors but no message received when i send ou a message
+> you should not create the same channels on the sender and receiver side, but just use ondatachannel to get the channels created on the other side 
 
-+ `2016-1204` why yield function use co-view will make me down something in the browser when i request the page?  
- > ##### you should set the type of response to 'html', default value was `application/octet-stream`...
+> just create createDataChannel before create offer!
 
-+ `2016-1211` it doesn't work on mobile device when post jsonp, error is only '{}'
-
-+ `2016-1211` can't get 'this.request.body' when post something
++ `2016-1218` first user A can send message to second user B, but cant receive message from A??
