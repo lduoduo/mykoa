@@ -1,0 +1,168 @@
+// 父元素属性
+// 设定父元素为弹性盒子
+// @value：inline-flex;
+// 常规仅需要调用.flexbox();无需传参
+.flexbox() {
+	display: -webkit-box;  // 老语法 - iOS 6-, Safari 3.1-6
+	display: -moz-box;     // 老语法 - Firefox 19-
+	display: -webkit-flex; // 新语法 - Chrome
+	display: flex;		   // 新语法 - Opera 12.1, Firefox 20+
+	& > * {
+		display: block;	   // 老语法 - 阻止inline子元素无效
+	}
+}
+.flexbox(@value) when (@value = inline-flex){
+	display: -webkit-inline-box;  
+	display: -moz-inline-box;     
+	display: -webkit-inline-flex; 
+	display: inline-flex;		   
+	& > * {
+		display: block;
+	}
+}
+// 父元素属性
+// 设定子元素水平方向分布方式，
+// @value: flex-start(default)/flex-end/center/space-between/space-around
+// space-around 不具有兼容性，禁止传入，微信可以酌情使用。
+// 子元素宽度之和需小于父元素宽度效果可见，即不可设置flex属性。
+.justify-content(@value){
+	-webkit-justify-content: @value;
+	justify-content: @value;
+}
+.justify-content(@value) when (@value = flex-start) {
+	-webkit-box-pack: start;
+	-moz-box-pack: start;
+}
+.justify-content(@value) when (@value = flex-end) {
+	-webkit-box-pack: end;
+	-moz-box-pack: end;
+}
+.justify-content(@value) when (@value = center) {
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+}
+.justify-content(@value) when (@value = space-between) {
+	-webkit-box-pack: justify;
+	-moz-box-pack: justify;
+}
+//父元素属性
+//设定子元素纵向分布方式
+//@value: flex-start/flex-end/center/baseline/stretch(default)
+//依赖父元素高度
+//设置子元素高度后,再传入stretch亦无效。
+.align-items(@value) {
+	-webkit-align-items: @value;
+	align-items: @value;
+}
+.align-items(@value) when (@value = flex-start) {
+	-webkit-box-align: start;
+	-moz-box-align: start;
+}
+.align-items(@value) when (@value = flex-end) {
+	-webkit-box-align: end;
+	-moz-box-align: end;
+}
+.align-items(@value) when (@value = center) {
+	-webkit-box-align: center;
+	-moz-box-align: center;
+}
+.align-items(@value) when (@value = baseline) {
+	-webkit-box-align: baseline;
+	-moz-box-align: baseline;
+}
+.align-items(@value) when (@value = stretch) {
+	-webkit-box-align: stretch;
+	-moz-box-align: stretch;
+}
+// 父元素属性
+// 设置子元素渲染方向
+// @value: row(default)/row-reverse/column/column-reverse
+// column & column-reverse 时不能设置flex属性。冲突。
+.flex-direction(@value) {
+	-webkit-flex-direction: @value;
+	flex-direction: @value;
+}
+.flex-direction(@value) when (@value = row){
+	-webkit-box-orient: horizontal;
+	-webkit-box-direction: normal;
+	-moz-box-orient: horizontal;
+	-moz-box-direction: normal;
+}
+.flex-direction(@value) when (@value = row-reverse){
+	-webkit-box-orient: horizontal;
+	-webkit-box-direction: reverse;
+	-moz-box-orient: horizontal;
+	-moz-box-direction: reverse;
+}
+.flex-direction(@value) when (@value = column){
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: normal;
+	-moz-box-orient: vertical;
+	-moz-box-direction: normal;
+}
+.flex-direction(@value) when (@value = column-reverse){
+	-webkit-box-orient: vertical;
+	-webkit-box-direction: reverse;
+	-moz-box-orient: vertical;
+	-moz-box-direction: reverse;
+}
+//子元素属性
+//设置伸缩比例。数值越大，占比越多，无视内容
+// @value 设置伸缩比例，默认为1，平均分布
+.flex(@value:1) {
+	width: 0%;			  // 老版本flex-basis缺失 - 阻止容器内内容影响宽度
+	-webkit-box-flex: @value;  
+	-moz-box-flex: @value;     
+	-webkit-flex: @value;      
+	flex: @value;			  
+}
+//子元素属性
+//设置排列顺序，默认老版本1，新版本0
+//新版本负值有效，老版本不支持，兼容考虑不要传入负值。
+.order(@value:0) {
+	-webkit-box-ordinal-group: @value + 1; 
+	-moz-box-ordinal-group: @value + 1;
+	-webkit-order: @value; 
+	order: @value;
+}
+
+
+.container {
+	//可以用的属性
+	.flexbox(); 
+
+	.justify-content(center);
+
+	// .align-items(flex-end);
+
+	// .flex-direction(row);
+
+	height: 100%;//依赖父元素高度
+
+	.items {
+		width: 20%;
+		height: 30%;
+		// .flex();
+		font-size:100px;
+		text-align: center;
+		color: #fff; 		
+		word-break: break-all;
+	}
+	.loopTest();
+	.loopTest(@i: 1) when (@i <= 6) {
+	    .items-@{i} {
+	        @bgColorList: #1F2120, #0739D0, #D70A57, #A90DB9, #093957,#145B06;
+	        @widthList: 10%, 20%, 25%, 5%, 30%,50%;
+	        background: extract(@bgColorList, @i);
+	    }
+	    .loopTest(@i+1);
+	}
+
+	.items-1 {
+		.order();
+	}
+
+	.items-2 {
+		// padding-top: 30px;
+	}
+}

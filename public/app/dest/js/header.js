@@ -35,8 +35,8 @@
     };
 })();
 var ERROR = {
-    appname: appName,
-    pagename: pageName,
+    appname: MY.appName,
+    pagename: MY.pageName,
     platform: navigator.platform + ':' + navigator.userAgent.match(/\s\w+\/\d+/g)[1]
 };
 // window.addEventListener('error',function(e){
@@ -54,8 +54,8 @@ window.onerror = function (errorMessage, source, lineno, colno, error) {
     // ajax.postp(monitorUrl, ERROR, null, function(e){
     //     alert(e.stack);
     // });
-
-    ajax.post('/data/updateLog', ERROR);
+    alert(JSON.stringify(info));
+    // ajax.post('/data/updateLog', ERROR);
 
 }
 // var a = b+1;
