@@ -56,7 +56,7 @@ var constraints = {
 
 //弹窗插件配置
 var Mt = {
-    alert: function (option) {
+    alert: function(option) {
         //type, title, msg, btnMsg, cb, isLoading
         swal({
             title: option.title,
@@ -73,7 +73,7 @@ var Mt = {
             html: option.html
         }, option.cb);
     },
-    close: function () {
+    close: function() {
         swal.close();
     }
 };
@@ -102,30 +102,35 @@ var my = {
 
 var local = localStorage || window.localStorage; //本地存储
 // ---------初始化启动socket, 创建socket链接-----------
-var socket = io('https://192.168.31.105:8098',{path: "/rtcSocket",query: 'roomId=' + my.roomId});
-// var socket = io.connect({ path: "/rtcSocket", query: 'roomId=' + my.roomId, "transports": ['websocket'] });
 
+/** 本地环境的socket协议和线上不一致，需要作区分 !!  */
 
+var socket = null;
+if (MY.environment == "dev") {
+    socket = io('https://' + window.location.hostname + ':8098', { path: "/rtcSocket", query: 'roomId=' + my.roomId });
+} else {
+    socket = io.connect({ path: "/rtcSocket", query: 'roomId=' + my.roomId, "transports": ['websocket'] });
+}
 
 var rtc = {
-    init: function () {
+    init: function() {
         this.initStatus();
         this.initSocket();
         this.join();
         this.initEvent();
 
     },
-    initEvent: function () {
+    initEvent: function() {
         var _ = this;
         // var shots = $('#snapshot')[0];
-        $('body').on('click', '#snapshot', function (e) {
+        $('body').on('click', '#snapshot', function(e) {
             if (my.stream) {
                 cctx.drawImage(myvideo, 0, 0);
                 $('#img')[0].src = canvas.toDataURL('image/webp');
             }
         });
         // video click
-        $('body').on('click', '.video .item', function (e) {
+        $('body').on('click', '.video .item', function(e) {
             if (!$(e.target).hasClass('fixed')) {
                 return;
             }
@@ -133,13 +138,13 @@ var rtc = {
             $(e.target).removeClass('fixed');
         });
         //video source change
-        $('body').on('click', '.J-additional-inputs .item', function (e) {
+        $('body').on('click', '.J-additional-inputs .item', function(e) {
             constraints.video.optional = [{ sourceId: $(e.target).data('id') }];
             _.initMedia();
         });
 
         //send msg button click
-        $('body').on('click', '.J-send-msg', function (e) {
+        $('body').on('click', '.J-send-msg', function(e) {
             var data = $('.J-msg-in').val();
             if (!data) { return; }
             my.dataChannel.send(data);
@@ -148,28 +153,28 @@ var rtc = {
         });
 
         //clean msg button click
-        $('body').on('click', '.J-clean-msg', function (e) {
+        $('body').on('click', '.J-clean-msg', function(e) {
             $('.J-msg').html('');
         });
     },
     //init local data
-    initStatus: function () {
+    initStatus: function() {
         my.info = JSON.parse(local.getItem('myinfo') || null);
     },
     //初始化socket的各种监听事件
-    initSocket: function () {
+    initSocket: function() {
         var _ = this;
         // 加入房间
-        socket.on('connect', function () {
+        socket.on('connect', function() {
             console.log('heart beat...');
         });
         // 监听消息
-        socket.on('msg', function (user, msg) {
+        socket.on('msg', function(user, msg) {
             console.log(msg);
         });
 
         // 监听系统消息
-        socket.on('sys', function (sysMsg, data) {
+        socket.on('sys', function(sysMsg, data) {
             if (sysMsg == "in") {
                 // console.log(data);
                 Mt.alert({
@@ -185,13 +190,13 @@ var rtc = {
         });
 
         // 监听自己的消息
-        socket.on('self', function (sysMsg, data) {
+        socket.on('self', function(sysMsg, data) {
             //要加入的房间已满，重新选择房间
             if (sysMsg == 'error') {
                 Mt.alert({
                     title: data,
                     confirmBtnMsg: '好',
-                    cb: function () {
+                    cb: function() {
                         var id = Math.floor(Math.random() * 1000);
                         var tmp = window.location.href;
                         if (/roomid=\w+/.test(tmp)) {
@@ -211,7 +216,7 @@ var rtc = {
         });
 
         /** 和peer有关的监听 */
-        socket.on('peer', function (data) {
+        socket.on('peer', function(data) {
             console.log(data);
             switch (data.type) {
                 case "candidate": _.onNewPeer(data.data); break;
@@ -223,11 +228,11 @@ var rtc = {
 
     },
     //发送文字消息
-    sendMsg: function (msg) {
+    sendMsg: function(msg) {
         socket.send(my.info, msg);
     },
     //p2p连接的消息传递
-    send: function (type, data) {
+    send: function(type, data) {
         socket.emit('peer', {
             type: type,
             data: {
@@ -237,19 +242,19 @@ var rtc = {
         });
     },
     //离开房间
-    leave: function () {
+    leave: function() {
         socket.emit('leave');
     },
     //加入房间
-    join: function () {
+    join: function() {
         socket.emit('join', my.info);
     },
     /** init media */
-    initMedia: function () {
+    initMedia: function() {
         var _this = this;
         if (navigator.getUserMedia) {
             // 支持
-            navigator.getUserMedia(constraints, function (stream) {
+            navigator.getUserMedia(constraints, function(stream) {
                 _this.loadStream(_this, stream);
                 _this.initPeerConnection(stream);
             }, _this.err);
@@ -262,7 +267,7 @@ var rtc = {
         }
     },
     //init connection
-    initPeerConnection: function (stream) {
+    initPeerConnection: function(stream) {
         if (!hasRTCPeerConnection()) {
             Mt.alert({
                 title: "web rtc not supported for connection",
@@ -272,7 +277,7 @@ var rtc = {
         }
         this.setupPeerConnection(stream);
     },
-    setupPeerConnection: function (stream) {
+    setupPeerConnection: function(stream) {
         var _ = this;
         //Google的STUN服务器：stun:stun.l.google.com:19302 ??
         var iceServer = {
@@ -287,7 +292,7 @@ var rtc = {
 
         my.connection.addStream(stream);
         /** 视频流传递 */
-        my.connection.onaddstream = function (e) {
+        my.connection.onaddstream = function(e) {
             console.log(e);
             // var video = document.createElement('video');
             uvideo.src = window.URL.createObjectURL(e.stream);
@@ -295,14 +300,14 @@ var rtc = {
             // my.connectors
         };
         /** 设置本地sdp后触发该事件，发送自己的candidate */
-        my.connection.onicecandidate = function (e) {
+        my.connection.onicecandidate = function(e) {
             if (e.candidate) {
                 my.candidate = e.candidate;
                 _.send('candidate', e.candidate);
             }
         };
 
-        my.connection.oniceconnectionstatechange = function (e) {
+        my.connection.oniceconnectionstatechange = function(e) {
             console.log('iceConnectionState: ' + my.connection.iceConnectionState);
             if (my.dataChannel) {
                 console.log('data channel state: ' + my.dataChannel.readyState);
@@ -311,7 +316,7 @@ var rtc = {
         };
 
         /** 对接收方的数据传递设置 */
-        my.connection.ondatachannel = function (e) {
+        my.connection.ondatachannel = function(e) {
             console.log('Data channel is created!');
 
             my.dataChannel = e.channel;
@@ -324,21 +329,21 @@ var rtc = {
         _.send('ready', my.info);
     },
     /** 消息接收处理 */
-    onDataChannel: function () {
+    onDataChannel: function() {
         var _ = this;
-        my.dataChannel.onopen = function () {
+        my.dataChannel.onopen = function() {
             console.log('dataChannel opened');
         };
-        my.dataChannel.onerror = function (error) {
+        my.dataChannel.onerror = function(error) {
             console.log("Error:", error);
         };
-        my.dataChannel.onmessage = function (data) {
+        my.dataChannel.onmessage = function(data) {
             console.log(data);
             _.showMsg(data.data);
         };
     },
     /** 将对方加入自己的候选者中 */
-    onNewPeer: function (data) {
+    onNewPeer: function(data) {
         var candidate = data.data;
         my.connection.addIceCandidate(new RTCIceCandidate(candidate));
 
@@ -347,27 +352,27 @@ var rtc = {
         // $('body').append(video);
     },
     /** 接收链接邀请，发出响应 */
-    onOffer: function (data) {
+    onOffer: function(data) {
         var _ = this;
         var offer = data.data;
         my.connectors[data.user.id] = data.user.name;
-        my.connection.setRemoteDescription(new RTCSessionDescription(offer), function () {
+        my.connection.setRemoteDescription(new RTCSessionDescription(offer), function() {
 
-            my.connection.createAnswer(function (_answer) {
+            my.connection.createAnswer(function(_answer) {
                 my.connection.setLocalDescription(_answer);
                 _.send('answer', _answer);
-            }, function (err) {
+            }, function(err) {
                 console.log('An error occur on onOffer.' + err);
             });
         });
     },
     /** 接收响应，设置远程的peer session */
-    onAnswer: function (data) {
+    onAnswer: function(data) {
         var answer = data.data;
         my.connection.setRemoteDescription(new RTCSessionDescription(answer));
     },
     /** 对方离开，断开链接 */
-    onLeave: function (user) {
+    onLeave: function(user) {
         delete my.connectors[user.id];
         my.connection.close();
         my.connection.onicecandidate = null;
@@ -375,19 +380,19 @@ var rtc = {
         this.setupPeerConnection(my.stream);
     },
     /** 开始连接, 发出链接邀请 */
-    startPeerConnection: function () {
+    startPeerConnection: function() {
         var _ = this;
 
         //创建数据流信道, 不能一开始就创建，这样有问题, 而且顺序必须在createOffer之前
         my.dataChannel = my.connection.createDataChannel("sendDataChannel", { reliable: false });
         _.onDataChannel();
 
-        my.connection.createOffer(function (_offer) {
+        my.connection.createOffer(function(_offer) {
             my.offer = _offer;
             console.log('offer:' + JSON.stringify(_offer));
             _.send('offer', _offer);
             my.connection.setLocalDescription(_offer);
-        }, function (error) {
+        }, function(error) {
             Mt.alert({
                 title: "An error on startPeerConnection:" + error,
                 timer: 1000
@@ -396,7 +401,7 @@ var rtc = {
 
     },
     /** video视频呈现媒体流 */
-    loadStream: function (ctx, stream) {
+    loadStream: function(ctx, stream) {
         console.log(stream);
         my.stream = stream;
         // var video = document.createElement('video');
@@ -411,7 +416,7 @@ var rtc = {
         //or
         // myvideo.play();
 
-        myvideo.onloadedmetadata = function (e) {
+        myvideo.onloadedmetadata = function(e) {
             console.log("Label: " + stream.label);
             console.log("AudioTracks", stream.getAudioTracks());
             console.log("VideoTracks", stream.getVideoTracks());
@@ -421,11 +426,11 @@ var rtc = {
         // audioInput.connect(actx.destination);
 
     },
-    err: function (e) {
+    err: function(e) {
         console.log(e);
     },
     //获取摄像头和麦克风的列表
-    mstlist: function () {
+    mstlist: function() {
         var _ = this;
         if (typeof MediaStreamTrack === "undefined") {
             Mt.alert({
@@ -435,7 +440,7 @@ var rtc = {
             });
             return;
         }
-        MediaStreamTrack.getSources(function (sourceInfo) {
+        MediaStreamTrack.getSources(function(sourceInfo) {
             if (sourceInfo.length == 0) {
                 Mt.alert({
                     type: 'error',
@@ -458,7 +463,7 @@ var rtc = {
         });
     },
     //如果有多个视频音频输入，屏幕上进行展示
-    showInputs: function () {
+    showInputs: function() {
         var inputsEL = document.createElement('div');
         inputsEL.className = "item additional-inputs J-additional-inputs";
         var html = "";
@@ -481,7 +486,7 @@ var rtc = {
         $('.J-btn-group').append(inputsEL);
     },
     //显示聊天信息
-    showMsg: function (data, isSelf) {
+    showMsg: function(data, isSelf) {
         var className = isSelf ? "right" : "left";
 
         // console.log('msg from :' + JSON.stringify(user));
