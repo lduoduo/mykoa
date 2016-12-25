@@ -1,8 +1,13 @@
 <% include ../layout/header.html %>
-
+    <div class="test"></div>
     <div class="box">
         <canvas class="canvas"></canvas>
-        <input type="file" class="upload J-upload" placeholder="选择图片">
+        <div class="label"></div>
+        <div class="btn-option">
+            <a class="btn btn-green J-btn-upload">点击上传</a>
+            <a class="btn btn-warnning J-btn-camera">拍照</a>
+            <input type="file" class="hidden upload J-upload" placeholder="选择图片">
+        </div>
     </div>
-
+    <script src="<%- config.frontURL.js %>touch.js"></script>
 <% include ../layout/footer.html %>
