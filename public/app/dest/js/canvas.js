@@ -105,7 +105,6 @@ var canvas = {
 
         var initialScale = 1;
         var currentScale;
-        v ==1;
 
         touch.on('.canvas', 'pinchstart', function (ev) {
             currentScale = ev.scale - 1;
@@ -116,7 +115,7 @@ var canvas = {
 
             ERROR.logtype = "touch";
             ERROR.log = "当前缩放比例为:" + currentScale + ".";
-            // alert(JSON.stringify(perf));
+            alert(JSON.stringify(ERROR.log));
             ajax.post('/data/updateLog', ERROR);
 
             // log("当前缩放比例为:" + currentScale + ".");
@@ -135,6 +134,7 @@ var canvas = {
         }
         var image = _.image;
         image.onload = function () {
+
             _.draw();
         }
 
@@ -190,6 +190,45 @@ var canvas = {
 
 }
 
+var touch = {
+    data: {
+        touch1: {},
+        touch2: {}
+    }, //touch位置数据
+    init: function () {
+        document.addEventListener("touchstart", this.touchStart, false);
+
+        document.addEventListener("touchend", this.touchEnd, false);
+    },
+    touchStart: function () {
+        event.preventDefault();
+        var touches1 = event.touches[0];
+        var touches2 = event.touches[1];
+        var tmp1 = this.data.touch1;
+        var tmp2 = this.data.touch2;
+        tmp1.startX = touches1.pageX;
+        tmp1.startY = touches1.pageY;
+        tmp2.startX = touches2.pageX;
+        tmp2.startY = touches2.pageY;
+    },
+    touchEnd: function () {
+        event.preventDefault();
+        var touches1 = event.changedTouches[0];
+        var touches2 = event.changedTouches[1];
+        var tmp1 = this.data.touch1;
+        var tmp2 = this.data.touch2;
+
+        tmp1.endX = touches1.pageX;
+        tmp1.endY = touches1.pageY;
+        tmp2.endX = touches2.pageX;
+        tmp2.endY = touches2.pageY;
+
+        var len1 = tmp1.endX-tmp1.startX;
+        //写不下去了
+        var lenX = this.data.endX - this.data.startX;
+        var lenY = this.data.endY - this.data.startY;
+    }
+}
 canvas.init();
 
 

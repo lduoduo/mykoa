@@ -39,8 +39,8 @@ var ERROR = {
     pagename: MY.pageName,
     platform: navigator.platform + ':' + navigator.userAgent.match(/\s\w+\/\d+/g)[1]
 };
-// window.addEventListener('error',function(e){
-//     console.log(e);
+// window.addEventListener('error',function(message,url,line){
+//     console.log(message);
 // });
 window.onerror = function (errorMessage, source, lineno, colno, error) {
     var info = "错误信息：" + errorMessage + "\n" +
@@ -55,9 +55,10 @@ window.onerror = function (errorMessage, source, lineno, colno, error) {
     //     alert(e.stack);
     // });
     alert(JSON.stringify(info));
-    // ajax.post('/data/updateLog', ERROR);
+    ajax.post('/data/updatelog', ERROR);
 
 }
+
 // var a = b+1;
 function bigpipe(id, content) {
     //             var dom = document.querySelector('component[name='+id+']');
