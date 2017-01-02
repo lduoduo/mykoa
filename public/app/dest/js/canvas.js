@@ -121,7 +121,7 @@ var canvas = {
         if (scale) {
             ERROR.logtype = "scale";
             ERROR.log = "scale: " + scale;
-            // ajax.post('/data/updatelog', ERROR);
+            ajax.post('/data/updatelog', ERROR);
         }
 
         if (!_.image) { return; }
@@ -203,7 +203,7 @@ var touch = {
 
         ERROR.logtype = "touch";
         ERROR.log = "touchstart: " + JSON.stringify(tmp1);
-        ajax.post('/data/updatelog', ERROR);
+        // ajax.post('/data/updatelog', ERROR);
     },
     touchEnd: function (event) {
         var _ = touch;
@@ -219,17 +219,28 @@ var touch = {
         tmp2.endX = touches2.pageX;
         tmp2.endY = touches2.pageY;
 
-        var x1 = Math.abs(tmp1.endX - tmp1.startX);
-        var y1 = Math.abs(tmp1.endY - tmp1.startY);
+        // var x1 = Math.abs(tmp1.endX - tmp1.startX);
+        // var y1 = Math.abs(tmp1.endY - tmp1.startY);
 
-        var x2 = Math.abs(tmp2.endX - tmp2.startX);
-        var y2 = Math.abs(tmp2.endY - tmp2.startY);
+        // var x2 = Math.abs(tmp2.endX - tmp2.startX);
+        // var y2 = Math.abs(tmp2.endY - tmp2.startY);
 
-        var len1 = Math.sqrt(x1 * x1 + y1 * y1);
-        var len2 = Math.sqrt(x2 * x2 + y2 * y2);
-        //写不下去了
-        var r = Math.abs(len1 - len2) / len1 / 5;
-        _.data.r = len1 > len2 ? 1 - r : 1 + r;
+        // var len1 = Math.sqrt(x1 * x1 + y1 * y1);
+        // var len2 = Math.sqrt(x2 * x2 + y2 * y2);
+
+        //原始距离
+        var x0 = Math.abs(tmp1.startX - tmp2.startX);
+        var y0 = Math.abs(tmp2.startY - tmp2.startY);
+        var len0 = Math.sqrt(x0 * x0 + y0 * y0);
+
+        //目标距离
+        var x = Math.abs(tmp1.endX - tmp2.endX);
+        var y = Math.abs(tmp2.endY - tmp2.endY);
+        var len = Math.sqrt(x * x + y * y);
+
+        //缩放的距离比
+        var r = Math.abs(len0 - len) / len;
+        _.data.r = len > len0 ? 1 + r : (1 - r <= 0 ? 0.1 : 1 - r);
 
         _.cb && _.cb(_.data.r, _.env);
     }
