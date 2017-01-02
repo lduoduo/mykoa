@@ -25,6 +25,7 @@ body{
     text-align: center;
     font-size: 15px;
     position: relative;
+    overflow: hidden;
 }
 .box .canvas{
     /*width: 100vw;*/
@@ -43,13 +44,14 @@ body{
     margin-left: -40vw;
     border: 5px dashed #ddd;
 }
-.box .btn-option{
-    position: absolute;
+.btn-option{
+    position: fixed;
     width: 100%;
     bottom: 20px;
     text-align: center;
+    z-index: 1;
 }
-.box .btn{
+.btn{
     display: inline-block;
     background: blue;
     padding: 5px 15px;

@@ -26,8 +26,8 @@ module.exports = class Config {
         this.socketPorts = 8099;
         /*站点引用静态资源的地址*/
         this.frontURL = {
-            js: 'https://' + this.ip + ':' + this.staticPorts + '/static/js/',
-            css: 'https://' + this.ip + ':' + this.staticPorts + '/static/css/'
+            js: 'http://' + this.ip + ':' + this.staticPort + '/static/js/',
+            css: 'http://' + this.ip + ':' + this.staticPort + '/static/css/'
         };
         /* domain */
         this.domain = 'ldodo.cc';

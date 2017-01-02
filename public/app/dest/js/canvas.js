@@ -58,7 +58,7 @@ var params = {
         if (files) {
             var reader = new FileReader();
             reader.onload = function (e) {
-                canvas.draw(e.target.result);
+                canvas.loadImage(e.target.result);
             }
             reader.readAsDataURL(files);
         }
@@ -83,8 +83,9 @@ var canvas = {
         // this.canvas.width = document.body.clientWidth;
         // this.canvas.height = document.body.clientHeight * 0.9;
         this.ctx = this.canvas.getContext('2d');
-        this.initEvent();
+
         this.initHammer();
+        this.initEvent();
     },
     initEvent: function () {
         $('body').on('click', '.J-btn-upload', function () {
@@ -96,35 +97,8 @@ var canvas = {
     },
     //初始化手势监控
     initHammer: function () {
-        var target = document.querySelector('.canvas');
-        target.style.webkitTransition = 'all ease 0.05s';
-
-        touch.on('.canvas', 'touchstart', function (ev) {
-            ev.preventDefault();
-        });
-
-        var initialScale = 1;
-        var currentScale;
-
-        touch.on('.canvas', 'pinchstart', function (ev) {
-            currentScale = ev.scale - 1;
-            currentScale = initialScale + currentScale;
-            currentScale = currentScale > 2 ? 2 : currentScale;
-            currentScale = currentScale < 1 ? 1 : currentScale;
-            this.style.webkitTransform = 'scale(' + currentScale + ')';
-
-            ERROR.logtype = "touch";
-            ERROR.log = "当前缩放比例为:" + currentScale + ".";
-            alert(JSON.stringify(ERROR.log));
-            ajax.post('/data/updateLog', ERROR);
-
-            // log("当前缩放比例为:" + currentScale + ".");
-        });
-
-        touch.on('.canvas', 'pinchend', function (ev) {
-            initialScale = currentScale;
-        });
-
+        //将当前环境传递进去
+        touch.init($('.box')[0], this.draw, this);
     },
     //加载图片获取图片数据
     loadImage: function (data) {
@@ -141,7 +115,16 @@ var canvas = {
         image.src = data;
     },
     //使用canvas进行绘图
-    draw: function (scale) {
+    draw: function (scale, env) {
+        var _ = env || this;
+
+        if (scale) {
+            ERROR.logtype = "scale";
+            ERROR.log = "scale: " + scale;
+            // ajax.post('/data/updatelog', ERROR);
+        }
+
+        if (!_.image) { return; }
 
         _.ctx.clearRect(0, 0, _.canvas.width, _.canvas.height);
         _.ctx.beginPath();
@@ -192,43 +175,66 @@ var canvas = {
 
 var touch = {
     data: {
+        r: null, //缩放比
         touch1: {},
         touch2: {}
     }, //touch位置数据
-    init: function () {
-        document.addEventListener("touchstart", this.touchStart, false);
-
-        document.addEventListener("touchend", this.touchEnd, false);
+    init: function (el, cb, env) {
+        el.addEventListener("touchstart", this.touchStart, false);
+        el.addEventListener("touchmove", this.touchEnd, false);
+        el.addEventListener("touchend", this.touchEnd, false);
+        this.cb = cb;
+        this.env = env;
     },
-    touchStart: function () {
+    touchStart: function (event) {
+        var _ = touch;
         event.preventDefault();
+
+        // alert(event.touches.length);
+        if (event.touches.length <= 1) return;
         var touches1 = event.touches[0];
         var touches2 = event.touches[1];
-        var tmp1 = this.data.touch1;
-        var tmp2 = this.data.touch2;
+        var tmp1 = _.data.touch1;
+        var tmp2 = _.data.touch2;
         tmp1.startX = touches1.pageX;
         tmp1.startY = touches1.pageY;
         tmp2.startX = touches2.pageX;
         tmp2.startY = touches2.pageY;
+
+        ERROR.logtype = "touch";
+        ERROR.log = "touchstart: " + JSON.stringify(tmp1);
+        ajax.post('/data/updatelog', ERROR);
     },
-    touchEnd: function () {
+    touchEnd: function (event) {
+        var _ = touch;
         event.preventDefault();
+        if (event.changedTouches.length <= 1) return;
         var touches1 = event.changedTouches[0];
         var touches2 = event.changedTouches[1];
-        var tmp1 = this.data.touch1;
-        var tmp2 = this.data.touch2;
+        var tmp1 = _.data.touch1;
+        var tmp2 = _.data.touch2;
 
         tmp1.endX = touches1.pageX;
         tmp1.endY = touches1.pageY;
         tmp2.endX = touches2.pageX;
         tmp2.endY = touches2.pageY;
 
-        var len1 = tmp1.endX-tmp1.startX;
+        var x1 = Math.abs(tmp1.endX - tmp1.startX);
+        var y1 = Math.abs(tmp1.endY - tmp1.startY);
+
+        var x2 = Math.abs(tmp2.endX - tmp2.startX);
+        var y2 = Math.abs(tmp2.endY - tmp2.startY);
+
+        var len1 = Math.sqrt(x1 * x1 + y1 * y1);
+        var len2 = Math.sqrt(x2 * x2 + y2 * y2);
         //写不下去了
-        var lenX = this.data.endX - this.data.startX;
-        var lenY = this.data.endY - this.data.startY;
+        var r = Math.abs(len1 - len2) / len1 / 5;
+        _.data.r = len1 > len2 ? 1 - r : 1 + r;
+
+        _.cb && _.cb(_.data.r, _.env);
     }
 }
+
 canvas.init();
 
 
