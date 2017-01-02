@@ -1,12 +1,9 @@
-# mykoa
-my koa frameworks for my own projects, trying to make a fully adapted productive frameworks
+# canvas
+upload a pic and scale it with fingers, now has problems with the scale ratio of touch events!
 
-now begin...
-
-make it little by little, branch by branch, master branch always be the latest one with all features.
-if you want to learn from start.
-
-follow the orders below.
+goal:
+1. upload and scale
+2. AR
 
 ### branches info
 
