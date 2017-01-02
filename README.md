@@ -2,8 +2,9 @@
 upload a pic and scale it with fingers, now has problems with the scale ratio of touch events!
 
 goal:
-1. upload and scale
-2. AR
+> 1. upload and scale
+
+> 2. AR
 
 ### branches info
 
