@@ -8,4 +8,5 @@ module.exports = {
     '500':require('./500'),
     webrtc: require('./webrtc'),
     canvas: require('./canvas'),
+    canvas_scale: require('./canvas_scale'),
 }

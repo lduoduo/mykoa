@@ -17,6 +17,6 @@ exports.start = function () {
         route.get(rootPath + '/test', service.test.index),
         route.get(rootPath + '/webrtc', service.webrtc.index),
         route.get(rootPath + '/canvas', service.canvas.index),
-        
+        route.get(rootPath + '/canvas_scale', service.canvas_scale.index),
     ]);
 }
