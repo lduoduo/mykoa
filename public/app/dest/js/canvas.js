@@ -298,6 +298,10 @@ var touch = {
             y: tmp1.endY - tmp1.startY
         };
 
+        ERROR.logtype = "move";
+        ERROR.log = "move: " + move.x + ", " + move.y;
+        ajax.post('/data/updatelog', ERROR);
+
         // var x = event.center.x;
         // var y = event.center.y;
 
@@ -324,6 +328,10 @@ var touch = {
         imgData.scale = imgData.scale <= 0.01 ? 0.01 : imgData.scale;
         imgData.tempScale = event.scale;
         _.$uploadBg.css("transform", "scale(" + imgData.scale + "," + imgData.scale + ")");
+
+        ERROR.logtype = "scale";
+        ERROR.log = "scale: " + imgData.scale;
+        ajax.post('/data/updatelog', ERROR);
 
 
         // var touches1 = event.changedTouches[0];
