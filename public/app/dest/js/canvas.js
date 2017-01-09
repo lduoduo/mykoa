@@ -74,7 +74,38 @@ var params = {
 ZXXFILE = $.extend(ZXXFILE, params);
 ZXXFILE.init();
 
+//图片操作相关的数据
+var imgData = {
+    //图像的尺寸
+    origin: {
+        width: 0,
+        height: 0
+    },
+
+    //缩放比例 默认为1
+    scale: 1,
+
+    //偏移量
+    move: {
+        x: 0,
+        y: 0
+    },
+
+    //临时缩放比例
+    tempScale: 0,
+
+    //临时缩放偏移量,用于用户操作相关的计算
+    tempMove: {
+        x: 0,
+        y: 0
+    }
+
+};
+//默认值，用于清空
+var imgDataDefault = $.extend({}, imgData);
+
 var canvas = {
+    scale: 1, //初始缩放比
     canvas: null, //绘图canvas
     ctx: null, //绘图上下文
     image: null, //图片Image实例
@@ -109,21 +140,33 @@ var canvas = {
         var image = _.image;
         image.onload = function () {
 
+            imgData.origin.width = image.width;
+            imgData.origin.height = image.height;
+
             _.draw();
         }
 
         image.src = data;
     },
     //使用canvas进行绘图
-    draw: function (scale, env) {
+    draw: function (env, option) {
         var _ = env || this;
+        option = option || {};
 
-        if (scale) {
+        if (option.scale) {
+            _.scale = option.scale;
             ERROR.logtype = "scale";
-            ERROR.log = "scale: " + scale;
+            ERROR.log = "scale: " + option.scale;
             ajax.post('/data/updatelog', ERROR);
         }
 
+        if (option.move) {
+
+            _.move = option.move;
+            ERROR.logtype = "move";
+            ERROR.log = "move: " + _.move.x + ", " + _.move.y;
+            ajax.post('/data/updatelog', ERROR);
+        }
         if (!_.image) { return; }
 
         _.ctx.clearRect(0, 0, _.canvas.width, _.canvas.height);
@@ -157,15 +200,23 @@ var canvas = {
             }
 
             //带缩放系数的画图
-            if (scale) {
-                tmp.w = co.width * scale;
-                tmp.h = co.height * scale;
+            if (_.scale) {
+
+                tmp.w = co.width * _.scale;
+                tmp.h = co.height * _.scale;
                 tmp.dx = (co.width - tmp.w) * 0.5;
                 tmp.dy = (co.height - tmp.h) * 0.5;
+
+                // if (_.move) {
+                //     _.ctx.drawImage(image, _.move.x, _.move.y, _.canvas.width, _.canvas.height, tmp.dx, tmp.dy, tmp.w, tmp.h);//原图像到目标图像
+                //     return;
+                // }
+
                 _.ctx.drawImage(image, tmp.dx, tmp.dy, tmp.w, tmp.h);
 
                 return;
             }
+
 
             _.ctx.drawImage(image, 0, 0, _.canvas.width, _.canvas.height);
         }
@@ -190,14 +241,15 @@ var touch = {
         var _ = touch;
         event.preventDefault();
 
-        // alert(event.touches.length);
-        if (event.touches.length <= 1) return;
         var touches1 = event.touches[0];
-        var touches2 = event.touches[1];
         var tmp1 = _.data.touch1;
-        var tmp2 = _.data.touch2;
         tmp1.startX = touches1.pageX;
         tmp1.startY = touches1.pageY;
+
+        if (event.touches.length <= 1) return;
+
+        var touches2 = event.touches[1];
+        var tmp2 = _.data.touch2;
         tmp2.startX = touches2.pageX;
         tmp2.startY = touches2.pageY;
 
@@ -208,7 +260,29 @@ var touch = {
     touchEnd: function (event) {
         var _ = touch;
         event.preventDefault();
-        if (event.changedTouches.length <= 1) return;
+        if (event.changedTouches.length <= 1) {
+            _.move(event);
+            return;
+        }
+        _.scale(event);
+    },
+    move: function (event) {
+        var _ = this;
+
+        var touches1 = event.changedTouches[0];
+        var tmp1 = _.data.touch1;
+        tmp1.endX = touches1.pageX;
+        tmp1.endY = touches1.pageY;
+        _.cb && _.cb(_.env, {
+            move: {
+                x: tmp1.endX - tmp1.startX,
+                y: tmp1.endY - tmp1.startY
+            }
+        });
+    },
+    scale: function (event) {
+        var _ = this;
+
         var touches1 = event.changedTouches[0];
         var touches2 = event.changedTouches[1];
         var tmp1 = _.data.touch1;
@@ -239,10 +313,11 @@ var touch = {
         var len = Math.sqrt(x * x + y * y);
 
         //缩放的距离比
-        var r = Math.abs(len0 - len) / len;
-        _.data.r = len > len0 ? 1 + r : (1 - r <= 0 ? 0.1 : 1 - r);
+        var r = len / len0;
 
-        _.cb && _.cb(_.data.r, _.env);
+        _.cb && _.cb(_.env, {
+            scale: r <= 0.01 ? 0.01 : r
+        });
     }
 }
 
