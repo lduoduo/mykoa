@@ -67,3 +67,15 @@ body{
 .btn.btn-warnning{
     background: orange;
 }
+#pictureUpload-bg{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    -webkit-background-size: contain;
+    background-size: contain;
+    
+}

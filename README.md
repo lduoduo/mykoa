@@ -6,6 +6,8 @@ goal:
 
 > 2. AR
 
+原理：使用css的平移和缩放!
+
 ### branches info
 
 + `master` [back to master](https://github.com/lduoduo/mykoa)

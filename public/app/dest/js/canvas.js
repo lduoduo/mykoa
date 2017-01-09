@@ -58,7 +58,7 @@ var params = {
         if (files) {
             var reader = new FileReader();
             reader.onload = function (e) {
-                canvas.loadImage(e.target.result);
+                canvas.loadImage(e.target.result, files);
             }
             reader.readAsDataURL(files);
         }
@@ -73,6 +73,9 @@ var params = {
 };
 ZXXFILE = $.extend(ZXXFILE, params);
 ZXXFILE.init();
+
+//用户上传的图片由URL.createObjectURL生成的URL指向
+var imgObjectURL = "";
 
 //图片操作相关的数据
 var imgData = {
@@ -132,18 +135,30 @@ var canvas = {
         touch.init($('.box')[0], this.draw, this);
     },
     //加载图片获取图片数据
-    loadImage: function (data) {
+    loadImage: function (data, file) {
         var _ = this;
         if (!_.image) {
             _.image = new Image();
         }
         var image = _.image;
+
+        //释放上个图片的资源
+        if (imgObjectURL) {
+            window.URL.revokeObjectURL(imgObjectURL);
+        }
+        //生成图片的URL
+        imgObjectURL = window.URL.createObjectURL(file);
+
+        //显示图片
+        $("#pictureUpload-bg").css("backgroundImage", "url(\"" + imgObjectURL + "\")");
+
+        //储存原图片的尺寸
         image.onload = function () {
 
             imgData.origin.width = image.width;
             imgData.origin.height = image.height;
 
-            _.draw();
+            // _.draw();
         }
 
         image.src = data;
@@ -165,7 +180,7 @@ var canvas = {
             _.move = option.move;
             ERROR.logtype = "move";
             ERROR.log = "move: " + _.move.x + ", " + _.move.y;
-            ajax.post('/data/updatelog', ERROR);
+            // ajax.post('/data/updatelog', ERROR);
         }
         if (!_.image) { return; }
 
@@ -225,6 +240,7 @@ var canvas = {
 }
 
 var touch = {
+    $uploadBg: $('#pictureUpload-bg'),
     data: {
         r: null, //缩放比
         touch1: {},
@@ -241,6 +257,10 @@ var touch = {
         var _ = touch;
         event.preventDefault();
 
+        imgData.tempScale = event.scale;
+
+        // alert(event.scale);
+
         var touches1 = event.touches[0];
         var tmp1 = _.data.touch1;
         tmp1.startX = touches1.pageX;
@@ -254,8 +274,8 @@ var touch = {
         tmp2.startY = touches2.pageY;
 
         ERROR.logtype = "touch";
-        ERROR.log = "touchstart: " + JSON.stringify(tmp1);
-        // ajax.post('/data/updatelog', ERROR);
+        ERROR.log = "touchstart scale: " + JSON.stringify(event.scale);
+        ajax.post('/data/updatelog', ERROR);
     },
     touchEnd: function (event) {
         var _ = touch;
@@ -273,51 +293,74 @@ var touch = {
         var tmp1 = _.data.touch1;
         tmp1.endX = touches1.pageX;
         tmp1.endY = touches1.pageY;
-        _.cb && _.cb(_.env, {
-            move: {
-                x: tmp1.endX - tmp1.startX,
-                y: tmp1.endY - tmp1.startY
-            }
+        var move = {
+            x: tmp1.endX - tmp1.startX,
+            y: tmp1.endY - tmp1.startY
+        };
+
+        // var x = event.center.x;
+        // var y = event.center.y;
+
+        // var px = x - imgData.tempMove.x;
+        // var py = y - imgData.tempMove.y;
+
+        // imgData.move.x = imgData.move.x + px
+        // imgData.move.y = imgData.move.y + py
+
+        // imgData.tempMove.x = x;
+        // imgData.tempMove.y = y;
+
+        _.$uploadBg.css({
+            left: move.x + "px",
+            top: move.y + "px"
         });
+
+
     },
     scale: function (event) {
         var _ = this;
 
-        var touches1 = event.changedTouches[0];
-        var touches2 = event.changedTouches[1];
-        var tmp1 = _.data.touch1;
-        var tmp2 = _.data.touch2;
+        imgData.scale = event.scale - imgData.tempScale + imgData.scale;
+        imgData.scale = imgData.scale <= 0.01 ? 0.01 : imgData.scale;
+        imgData.tempScale = event.scale;
+        _.$uploadBg.css("transform", "scale(" + imgData.scale + "," + imgData.scale + ")");
 
-        tmp1.endX = touches1.pageX;
-        tmp1.endY = touches1.pageY;
-        tmp2.endX = touches2.pageX;
-        tmp2.endY = touches2.pageY;
 
-        // var x1 = Math.abs(tmp1.endX - tmp1.startX);
-        // var y1 = Math.abs(tmp1.endY - tmp1.startY);
+        // var touches1 = event.changedTouches[0];
+        // var touches2 = event.changedTouches[1];
+        // var tmp1 = _.data.touch1;
+        // var tmp2 = _.data.touch2;
 
-        // var x2 = Math.abs(tmp2.endX - tmp2.startX);
-        // var y2 = Math.abs(tmp2.endY - tmp2.startY);
+        // tmp1.endX = touches1.pageX;
+        // tmp1.endY = touches1.pageY;
+        // tmp2.endX = touches2.pageX;
+        // tmp2.endY = touches2.pageY;
 
-        // var len1 = Math.sqrt(x1 * x1 + y1 * y1);
-        // var len2 = Math.sqrt(x2 * x2 + y2 * y2);
+        // // var x1 = Math.abs(tmp1.endX - tmp1.startX);
+        // // var y1 = Math.abs(tmp1.endY - tmp1.startY);
 
-        //原始距离
-        var x0 = Math.abs(tmp1.startX - tmp2.startX);
-        var y0 = Math.abs(tmp2.startY - tmp2.startY);
-        var len0 = Math.sqrt(x0 * x0 + y0 * y0);
+        // // var x2 = Math.abs(tmp2.endX - tmp2.startX);
+        // // var y2 = Math.abs(tmp2.endY - tmp2.startY);
 
-        //目标距离
-        var x = Math.abs(tmp1.endX - tmp2.endX);
-        var y = Math.abs(tmp2.endY - tmp2.endY);
-        var len = Math.sqrt(x * x + y * y);
+        // // var len1 = Math.sqrt(x1 * x1 + y1 * y1);
+        // // var len2 = Math.sqrt(x2 * x2 + y2 * y2);
 
-        //缩放的距离比
-        var r = len / len0;
+        // //原始距离
+        // var x0 = Math.abs(tmp1.startX - tmp2.startX);
+        // var y0 = Math.abs(tmp2.startY - tmp2.startY);
+        // var len0 = Math.sqrt(x0 * x0 + y0 * y0);
 
-        _.cb && _.cb(_.env, {
-            scale: r <= 0.01 ? 0.01 : r
-        });
+        // //目标距离
+        // var x = Math.abs(tmp1.endX - tmp2.endX);
+        // var y = Math.abs(tmp2.endY - tmp2.endY);
+        // var len = Math.sqrt(x * x + y * y);
+
+        // //缩放的距离比
+        // var r = len / len0;
+
+        // _.cb && _.cb(_.env, {
+        //     scale: r <= 0.01 ? 0.01 : r
+        // });
     }
 }
 

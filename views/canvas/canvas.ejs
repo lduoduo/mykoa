@@ -1,9 +1,11 @@
 <% include ../layout/header.html %>
+
     <div class="test"></div>
     <div class="box">
+        <div id="pictureUpload-bg"></div>
+        <!-- 裁剪后 -->
         <canvas class="canvas"></canvas>
         <div class="label"></div>
-        
     </div>
     <div class="btn-option">
         <a class="btn btn-green J-btn-upload">点击上传</a>
@@ -11,4 +13,5 @@
         <input type="file" class=" upload J-upload" placeholder="选择图片">
     </div>
     <script src="//cdn.bootcss.com/hammer.js/2.0.8/hammer.js"></script>
+    
 <% include ../layout/footer.html %>
