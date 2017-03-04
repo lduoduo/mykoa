@@ -55,5 +55,6 @@ function getLocalIps(flagIpv6) {
     for (var dev in ifaces) {
         ifaces[dev].forEach(func);
     }
+    console.log(ips);
     return ips;
 };

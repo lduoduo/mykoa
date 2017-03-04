@@ -8,6 +8,19 @@ goal:
 
 原理：使用css的平移和缩放!
 
+### references:
+> [http://www.ituring.com.cn/article/273899](http://www.ituring.com.cn/article/273899)
+
+> [http://www.cnblogs.com/zhiyuan-2011/p/4236371.html](http://www.cnblogs.com/zhiyuan-2011/p/4236371.html)
+
+> [URL.createObjectURL和URL.revokeObjectURL](http://www.cnblogs.com/liulangmao/p/4262565.html)
+
+> [移动端图片预览组件，支持手势缩放，双击放大，缩小](https://github.com/webjyh/MPreview.mobile)
+
+> [移动端图片缩放](http://varyu.com/code/315.html)
+
+
+
 ### branches info
 
 + `master` [back to master](https://github.com/lduoduo/mykoa)
