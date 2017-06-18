@@ -2,7 +2,7 @@
 > no need any plugs to support real time communication of video/audio/text/file transfer and so on.
 > directly p2p connection through browser to browser, no need transfer message from server.
 
-[online demo](https://ldodo.cc/koa/webrtc)
+[online demo](https://ldodo.cc/koa/webrtc?roomid=123)
 ### 1. three base APIS
 + navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
  > currently get local user video or audio media as stream
