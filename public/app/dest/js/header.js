@@ -54,7 +54,7 @@ window.onerror = function (errorMessage, source, lineno, colno, error) {
     // ajax.postp(monitorUrl, ERROR, null, function(e){
     //     alert(e.stack);
     // });
-    alert(JSON.stringify(info));
+    console.error(JSON.stringify(info));
     // ajax.post('/data/updateLog', ERROR);
 
 }

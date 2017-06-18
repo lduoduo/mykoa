@@ -55,15 +55,20 @@ module.exports = class View extends Readable {
             query: ctx.query || {},
 
             config: config,
-            pageJs: config.frontURL.js,
-            pageCss: config.frontURL.css,
+            prefixJs: config.frontURL.js,
+            prefixCss: config.frontURL.css,
+
+            pageName: null,
+            pageCss: null,
+
             commons: {
                 js: config.frontURL.js + 'common.js',
                 css: config.frontURL.css + 'common.css'
             }
 
         };
-
+        // 附加js/css资源
+        this.references = [];
         this.components = [];
         /** render tpls in order, need pointer as index number */
         this.pointer = this.components.length;
@@ -98,8 +103,9 @@ module.exports = class View extends Readable {
 
         let tmp = this.data;
         tmp.pageName = name;
-        tmp.pageJs += name + '.js';
-        tmp.pageCss += name + '.css';
+        // this.re
+        // tmp.pageJs += name + '.js';
+        tmp.pageCss = tmp.prefixCss + name + '.css';
         /** not support deep copy here */
         Object.assign(this.data, data);
 
@@ -119,11 +125,22 @@ module.exports = class View extends Readable {
             cb: cb
         });
     }
-
+    /** manually add other js / css references to render in service
+     *  param: {
+     *      name: //references name
+     *  }
+     */
+    addReferences(name) {
+        this.references.push(name)
+    }
     /** render html */
     render() {
 
         var body = this;
+
+        this.addReferences('common.js')
+        this.addReferences(this.data.pageName + '.js')
+        // this.addReferences(this.data.pageName + '.css')
 
         return function* () {
             /** render page view */
@@ -131,10 +148,31 @@ module.exports = class View extends Readable {
 
             body.push(content);
 
+            /** render other references */
+            renderReferences(body);
+
             /** render tpl components*/
             renderComponents(body);
         }
     }
+}
+
+function renderReferences(body) {
+    let list = body.references
+    let prefix = body.data
+    list.forEach(function (item) {
+        prefix = /\.js$/gi.test(item) ? body.data.prefixJs : body.data.prefixCss
+        if (/\.js$/gi.test(item)) {
+            body.push(`
+                <script src=${prefix + item}></script>
+            `);
+        } else {
+            body.push(`
+                <link rel="stylesheet" href=${prefix + item}></link>
+            `);
+        }
+
+    })
 }
 
 function renderComponents(body) {

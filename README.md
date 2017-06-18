@@ -64,6 +64,15 @@
  *    - 设置B的描述信息, XXX.setRemoteDescription(new RTCSessionDescription(answer));
  * 7. AB链接建立完成, 开始传输实时数据
 
+## updates
++ 更新了老的代码，使用新的api
+
+## next step
++ 使用webaudio对音频进行各种音效处理
++ 视频处理
++ 本地录屏功能
++ ui完善
+
 
 ## references
 [google ppt](http://io13webrtc.appspot.com/#1)

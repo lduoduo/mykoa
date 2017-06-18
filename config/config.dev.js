@@ -10,7 +10,8 @@ module.exports = class Config {
         /*当前站点环境*/
         this.env = 'dev';
         /** local ip */
-        this.ip = getLocalIps()[1];
+        this.ips = getLocalIps()
+        this.ip = this.ips[1];
         /* port no of server*/
         this.serverPort = 8080;
         /* port no of static server*/

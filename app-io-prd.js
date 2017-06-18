@@ -77,7 +77,7 @@ io.on('connection', function (sockets) {
             console.log(room);
         }
 
-        if(Object.keys(room[roomId]).length == 0){
+        if (!room[roomId] || Object.keys(room[roomId]).length == 0) {
             delete room[roomId];
         }
 

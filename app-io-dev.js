@@ -39,22 +39,25 @@ io.on('connection', function (sockets) {
     var tmp = room[roomId];
 
     sockets.on('join', function (userinfo) {
-        // if(userinfo && userinfo.id && userinfo.name){
-        //     user = userinfo;
-        //     tmp[user.id] = user;
-        //     return;
-        // }
+
+
         if (Object.keys(tmp).length >= 2) {
             //通知要连接的客户，当前房间已经满员，不能加入
-            sockets.emit('self', 'error', "当前房间已经满了，请另外选择房间");
+            sockets.emit('self', 'error', "当前房间已满，无法加入");
             return;
         }
-        var id = "000" + Math.floor(Math.random() * 1000);
-        id = id.slice(-5); id = id.replace('0', 'a');
-        user.id = id;
-        user.name = id;
-        // user.name = (userinfo && userinfo.name) || user.id;
-        tmp[user.id] = user;
+        if (userinfo && userinfo.id && userinfo.name) {
+            user = userinfo;
+            tmp[user.id] = user;
+            // return;
+        } else {
+            var id = "000" + Math.floor(Math.random() * 1000);
+            id = id.slice(-5); id = id.replace('0', 'a');
+            user.id = id;
+            user.name = id;
+            // user.name = (userinfo && userinfo.name) || user.id;
+            tmp[user.id] = user;
+        }
 
         //给自己发消息
         sockets.emit('self', 'self', user);
@@ -77,7 +80,7 @@ io.on('connection', function (sockets) {
             console.log(room);
         }
 
-        if(Object.keys(room[roomId]).length == 0){
+        if (!room[roomId] || Object.keys(room[roomId]).length == 0) {
             delete room[roomId];
         }
 
