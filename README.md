@@ -72,7 +72,7 @@
 + 视频处理
 + 本地录屏功能
 + ui完善
-
++ 将webrtc独立出来形成一个单独的项目
 
 ## references
 [google ppt](http://io13webrtc.appspot.com/#1)
