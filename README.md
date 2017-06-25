@@ -2,7 +2,8 @@
 > no need any plugs to support real time communication of video/audio/text/file transfer and so on.
 > directly p2p connection through browser to browser, no need transfer message from server.
 
-[online demo](https://ldodo.cc/koa/webrtc?roomid=123)
+[video online demo](https://ldodo.cc/koa/webrtc?roomid=123)
+[desktop share online demo](https://ldodo.cc/koa/desktop)
 ### 1. three base APIS
 + navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia
  > currently get local user video or audio media as stream
@@ -66,6 +67,7 @@
 
 ## updates
 + 更新了老的代码，使用新的api
++ 新增桌面共享功能，将会单独抽出来
 
 ## next step
 + 使用webaudio对音频进行各种音效处理

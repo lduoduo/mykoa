@@ -4,3 +4,6 @@ html{
 body{
     background: #f3f3f3;
 }
+.hide{
+    display: none !important;
+}

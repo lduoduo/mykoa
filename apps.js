@@ -7,3 +7,5 @@ var server = require('./app-server')();
 var statics = require('./app-static')();
 /** start socket server */
 var io = require(`./app-io-${env}`)();
+
+var ws = require(`./app-ws-${env}`)();
