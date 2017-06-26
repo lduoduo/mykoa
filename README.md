@@ -35,8 +35,11 @@
 
 ### 服务启动后的访问链接
 
++ 音视频
 > https://ip:8081/koa/webrtc?roomid=10 `roomid值任意设置`
 
++ 桌面共享
+> https://ip:8081/koa/desktop
 
 目前只支持2个client的p2p链接，即每个房间只支持2个人
  * 角色A: 第一个进入房间的人，处于等待状态，是p2p链接发起方
