@@ -38,7 +38,7 @@
 + 音视频
 > https://ip:8081/koa/webrtc?roomid=10 `roomid值任意设置`
 
-+ 桌面共享
++ 桌面共享 [需安装谷歌插件，请点击](https://github.com/lduoduo/my-chrome-extensions/tree/master/desk-capture-share)
 > https://ip:8081/koa/desktop
 
 目前只支持2个client的p2p链接，即每个房间只支持2个人
