@@ -12,7 +12,7 @@ var Mt = {
             showCancelButton: !!option.cancelBtnMsg,
             cancelButtonText: option.cancelBtnMsg || "在犹豫一下",
             confirmButtonColor: "#DD6B55",
-            confirmButtonText: option.btnMsg || "好哒",
+            confirmButtonText: option.confirmBtnMsg || "好哒",
             showLoaderOnConfirm: option.isLoading,
             timer: option.timer,
             closeOnConfirm: false,

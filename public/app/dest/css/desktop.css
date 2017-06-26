@@ -32,6 +32,14 @@ h2 {
     text-align: center;
     position: relative;
 }
+.btn__common__box .video__share__url{
+    font-size: 20px;
+    
+}
+.btn__common__box .strong{
+    font-size: 25px;
+    margin: 0;
+}
 .btn__white, .btn__white-hover {
     line-height: 38px;
     color: #29B9CC;

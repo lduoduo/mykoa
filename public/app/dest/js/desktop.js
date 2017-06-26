@@ -1,5 +1,7 @@
 
 let home = {
+    // 是否已下载安装插件的重试
+    isReTry: false,
     // 发送出去的rtc
     rtcOut: null,
     init() {
@@ -9,7 +11,7 @@ let home = {
     initStatus() {
         let roomId = window.location.href.match(/roomid=(\w+)?/gi)
         if (!roomId) return
-        roomId = roomId[0].replace(/roomid=/gi,'');
+        roomId = roomId[0].replace(/roomid=/gi, '');
         // let ip = '192.168.31.210';
         // let ip = '10.242.96.105';        
         let address = `wss://${window.location.hostname}/rtcWs/?roomId=${roomId}`;
@@ -64,13 +66,28 @@ let home = {
                 that.toggleTip(false)
             })
         }).catch(error => {
-            Mt.alert({
-                title: '桌面共享目前需要安装一个小插件哦，请先安装把!',
-                confirmBtnMsg: '好'
-                // cb: function () {
+            alert(that.isReTry)
 
-                // }
-            });
+            function alert(isReTry) {
+
+                Mt.alert({
+                    title: '桌面共享目前需要安装一个插件哦',
+                    msg: '下载完成后请手动拖入浏览器的扩展程序管理页面并刷新网页',
+                    confirmBtnMsg: isReTry ? '已安装' : '下载',
+                    cancelBtnMsg: '不分享了',
+                    cb: function () {
+                        if (isReTry) {
+                            window.location.reload()
+                            return
+                        }
+                        let url = '/static/resource/desk-capture-share.crx'
+                        window.open(url, 'blank')
+                        that.isReTry = true
+                        alert(that.isReTry)
+                    }
+                });
+
+            }
             console.log(error)
         })
     },
@@ -87,11 +104,11 @@ let home = {
 
         let url = window.location.origin + window.location.pathname + '?roomid=' + roomId;
 
-        this.toggleTip(true, `复制下方连接给朋友吧，目前只支持一个朋友观看哦<br>${url}`)
+        this.toggleTip(true, `复制下方连接给朋友吧，目前只支持一个朋友观看哦<br><p class="strong">${url}</p>`)
         console.log(url)
     },
-    stopRTC(){
-         this.rtcOut && this.rtcOut.stop();
+    stopRTC() {
+        this.rtcOut && this.rtcOut.stop();
     }
 }
 /** 
@@ -129,7 +146,10 @@ let invoke = {
                 let data = event.data.response
                 if (event.data) that.isDesktopSupport = true
                 if (data.code !== 200) {
-                    mylog(data.error, '', 'error')
+                    Mt.alert({
+                        title: data.error,
+                        confirmBtnMsg: '好'
+                    });
                 }
                 if (data.type && data.type === 'mediastream') {
                     that.getStream(data)
