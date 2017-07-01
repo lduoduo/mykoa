@@ -40,6 +40,9 @@
 + 音视频
 > https://ip:8081/koa/webrtc?roomid=10 `roomid值任意设置`
 
++ dataChannel
+> https://ip:8081/koa/rtcata
+
 + 桌面共享 [需安装谷歌插件，请点击](https://github.com/lduoduo/my-chrome-extensions/tree/master/desk-capture-share)
 > https://ip:8081/koa/desktop
 
