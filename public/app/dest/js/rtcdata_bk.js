@@ -1,3 +1,6 @@
+/**
+ * rtcdata备份
+ */
 // 音视频画面容器
 let $localVideo = document.querySelector('.J-local-video');
 let $remoteVideo = document.querySelector('.J-remote-video');
@@ -5,32 +8,13 @@ let $remoteVideo = document.querySelector('.J-remote-video');
 var home = {
     // 显示远程的列表
     remoteVideo: {},
-    // 远端buffer数据
-    remote: {
-        // test是channelId, 这里为了说明数据结构这么写
-        test: {
-            buffer: [],
-            size: 0,
-            receivedSize: 0
-        }
-
-    },
-
     init() {
         this.initEvent();
     },
     initEvent() {
-        let that = this
         $('body').on('click', '.J-start', this.startRTC.bind(this))
         $('body').on('click', '.J-startMedia', this.controlMedia.bind(this))
-        $('body').on('click', '.J-send', function () {
-            that.sendData($('.J-rtc-data').val())
-        })
-        $('body').on('click', '.rtc__file', function () {
-            $('#fileInput').click()
-        })
-        $('body').on('change', '#fileInput', this.selectedFile.bind(this))
-
+        $('body').on('click', '.J-send', this.sendData.bind(this))
 
         window.addEventListener('beforeunload', this.destroy.bind(this));
     },
@@ -56,7 +40,9 @@ var home = {
         })
         this.localStream = stream = null
 
-        this.updateStream()
+        if (this.rtc && this.rtc.inited) {
+            this.rtc.updateStream()
+        }
     },
     /**
     * 开启音视频
@@ -133,94 +119,20 @@ var home = {
             $localVideo.autoplay = true;
             $localVideo.srcObject = stream;
 
-            that.updateStream(stream)
+            if (that.rtc && that.rtc.inited) {
+                that.rtc.updateStream(stream)
+            }
         }).catch((e) => {
             // mylog("<font>can't get local camera, see console error info</font>", '', 'error');
             console && console.error && console.error(e);
 
         });
     },
-    // 选择文件, 多文件
-    selectedFile() {
-        let fileInput = document.querySelector('input#fileInput')
-        let files = fileInput.files
-
-        for (let i in files) {
-            let tmp = files[i]
-            tmp.constructor === File && this.sendFile(tmp)
-        }
-
-    },
-    // 单个文件发送
-    sendFile(file) {
+    sendData(e) {
         if (!this.rtc || !this.rtc.inited) return
-
-        let that = this
-        let size = file.size;
-        let name = file.name;
-        let chunkSize = 16384;
-        let channelId = null;
-        this.rtc.updateData({
-            type: 'file',
-            channelType: 'ArrayBuffer',
-            data: {
-                name,
-                size,
-                chunkSize
-            }
-        }).then(cid => {
-            // console.log(cid)
-            if (!cid) return
-
-            channelId = cid
-            sliceFile(0);
-        })
-
-        // this.sendData({ type: 'file', data: { name, size, chunkSize } })
-
-        function sliceFile(offset) {
-            var reader = new FileReader();
-            reader.onload = (function () {
-                return function (e) {
-                    let data = e.target.result
-                    // that.sendData({ type: 'file', data: { data } });
-                    that.sendData({ channelId, data });
-
-                    if (file.size > offset + e.target.result.byteLength) {
-                        setTimeout(sliceFile, 0, offset + chunkSize);
-                    }
-                    else {
-                        that.sendData({ channelId, data: null });
-                    }
-                    // sendProgress.value = offset + e.target.result.byteLength;
-                };
-            })(file);
-            var slice = file.slice(offset, offset + chunkSize);
-            reader.readAsArrayBuffer(slice);
-        };
-
-    },
-    // 调用api发送数据的统一收口
-    sendData(data) {
-        if (!this.rtc || !this.rtc.inited) return
-        // let data = $('.J-rtc-data').val()
+        let data = $('.J-rtc-data').val()
         if (!data) return
-        // if (data.constructor !== ArrayBuffer) { data = JSON.stringify(data) }
-
-        this.rtc.updateData(data).then(channelId => {
-            console.log(channelId)
-        })
-    },
-    // 这里讲音视频数据转成blob
-    updateStream(stream) {
-        myLocalStream = stream;
-        // let blob = new Blob(stream, {
-        //     type: 'image/jpeg'
-        // });
-
-        if (this.rtc && this.rtc.inited) {
-            this.rtc.updateStream(stream)
-        }
+        this.rtc.updateData(data)
     },
     /** 
      * 开启rtc连接
@@ -275,67 +187,8 @@ var home = {
         $remoteVideo.play();
     },
     // 接收远程数据
-    startRemoteData(result) {
-
-        console.log('remote data:', result);
-
-        // 纯字符串数据
-        if (result.constructor === String) return
-
-        if (result.constructor === Object) {
-            let {type, channelId, data} = result
-
-            // 初始化文件接收工作
-            if (type && type === 'file' && channelId) {
-                let tmp = this.remote[channelId] = {}
-                tmp.size = data.size
-                tmp.receivedSize = 0
-                tmp.fileName = data.name
-                tmp.buffer = []
-                return
-            }
-
-            // 文件接收
-            if (data.constructor === ArrayBuffer) {
-                return this.onReceiveFile(result)
-            }
-        }
-    },
-    // 接收文件
-    onReceiveFile(result = {}) {
-        let {channelId, data} = result
-        if (!channelId || data.constructor !== ArrayBuffer) return
-
-        let tmp = this.remote[channelId]
-        let receiveBuffer = tmp.buffer
-
-        receiveBuffer.push(data);
-        tmp.receivedSize += data.byteLength;
-
-        // receiveProgress.value = receivedSize;
-
-        // we are assuming that our signaling protocol told
-        // about the expected file size (and name, hash, etc).
-
-        if (tmp.receivedSize === tmp.size) {
-            this.showReceivedFile(tmp)
-        }
-    },
-    // 接收到一个文件，进行显示
-    showReceivedFile(data) {
-        let receiveBuffer = data.buffer
-        let receivedSize = data.receivedSize
-        let received = new window.Blob(receiveBuffer);
-        receiveBuffer = [];
-
-        let a = document.createElement('a')
-        a.href = URL.createObjectURL(received);
-        a.download = data.fileName;
-        a.textContent = `收到文件,点击下载: ${data.fileName} ( ${data.size} bytes)`;
-        a.style.display = 'block';
-        a.style.background = '#fff';
-
-        $('.rtc__file')[0].parentNode.appendChild(a)
+    startRemoteData(data) {
+        console.log('remote data:', data);
     },
     // 远程连接断开
     stopRTC(uid) {

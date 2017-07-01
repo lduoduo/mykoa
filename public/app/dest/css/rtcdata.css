@@ -172,10 +172,11 @@ a {
     display: inline-block;
 }
 .input.rtc__file{
-    width: 150px;
+    /*width: 150px;*/
     height: 38px;
     outline: none;
     background: #fff;
+    cursor: pointer;
 }
 .btn__common__box  .input{
     background: transparent;

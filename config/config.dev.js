@@ -11,7 +11,7 @@ module.exports = class Config {
         this.env = 'dev';
         /** local ip */
         this.ips = getLocalIps()
-        this.ip = this.ips[1];
+        this.ip = this.ips[0];
         /* port no of server*/
         this.serverPort = 8080;
         /* port no of static server*/

@@ -37,6 +37,10 @@
 
 function rtcPeer() {
     this.rtcConnection = null;
+    // 默认开启的长连接通道
+    this.dataChannel = null;
+    // 特殊需求时候开启的别的通道
+    this.rtcDataChannels = {};
     this.stream = null;
     this.inited = false;
     this.supportedListeners = {
@@ -187,7 +191,6 @@ let fn = rtcPeer.prototype
 fn.on = function (name, fn) {
     this.listeners[name] = fn
 }
-
 // 初始化入口
 fn.init = function (option = {}) {
     let { url, stream, data} = option
@@ -214,11 +217,17 @@ fn.stop = function (data) {
     if (!this.inited) return
     this.listeners['stop'] && this.listeners['stop'](data)
 
-    if (this.dataChannel) this.dataChannel.close()
+    if (this.dataChannel) this.closeChannel(this.dataChannel)
+
+    for (let i in this.rtcDataChannels) {
+        this.closeChannel(this.rtcDataChannels[i])
+    }
+
     if (this.rtcConnection) this.rtcConnection.close()
 
     this.rtcConnection = null
     this.dataChannel = null
+    this.rtcDataChannels = {}
 
     this.duoduo_signal.stop()
 
@@ -268,8 +277,8 @@ fn.setup = function (wss) {
     }
 
     // 开启datachannel通道
-    this.dataChannel = rtcConnection.createDataChannel("ldodo", { negotiated: true, id: 0 });
-    this.onDataChannel();
+    this.dataChannel = rtcConnection.createDataChannel("ldodo", { negotiated: true, id: "ldodo" });
+    this.onDataChannel(this.dataChannel);
 
 
     this.initPeerEvent();
@@ -303,7 +312,7 @@ fn.initPeerEvent = function () {
     /** 设置本地sdp触发本地ice */
     rtcConnection.onicecandidate = function (event) {
 
-        console.log('on remote ICE: ', event.candidate);
+        console.log('on local ICE: ', event.candidate);
         if (event.candidate) {
             that.duoduo_signal.send('candidate', event.candidate);
         } else {
@@ -315,14 +324,28 @@ fn.initPeerEvent = function () {
         console.log('onnegotiationneeded', event);
     };
 
+    /** 对接收方的数据传递设置 */
+    rtcConnection.ondatachannel = function (e) {
+        let id = e.channel.id
+        let label = e.channel.label
+
+        console.log(`${that.getDate()} ---- on remote data channel ${label} ---> ${id}`);
+
+        that.rtcDataChannels[label] = e.channel
+        console.log(`${that.getDate()} ---- data channel state: ` + e.channel.readyState);
+
+        // 对接收到的通道进行事件注册!
+        that.onDataChannel(that.rtcDataChannels[label]);
+    };
+
     rtcConnection.oniceconnectionstatechange = function () {
         let state = rtcConnection.iceConnectionState
-        console.log("ice connection state change to: ", state);
+        console.log(`${that.getDate()} ---- ice connection state change to: `, state);
         if (state === 'connected') {
-            console.log('rtc connect success')
+            console.log(`${that.getDate()} ---- rtc connect success`)
         }
         if (that.dataChannel) {
-            console.log('data channel state: ' + that.dataChannel.readyState);
+            console.log(`${that.getDate()} ---- data channel state: ` + that.dataChannel.readyState);
         }
     };
 }
@@ -354,7 +377,6 @@ fn.createOffer = function () {
         console.error("An error on startPeerConnection:", error)
     })
 }
-
 // 实时更新媒体流
 fn.updateStream = function (stream) {
     if (!stream) stream = new MediaStream()
@@ -435,23 +457,140 @@ fn.updateStream = function (stream) {
 
 }
 // 实时更新data
+/**
+ * 实时更新data
+ * 需要对数据格式做验证
+ * 1. blob格式的传输，新建Blob通道，最后一次传输完毕进行关闭
+ * 2. arraybuffer格式的传输，新建arraybuffer通道，最后一次传输完毕进行关闭
+ * 3. 其他格式的数据通通以json格式传输，默认只开启一个长连接通道进行传输
+ * 4. 这里需要注意频繁关闭通道会不会有性能问题，需要调研!
+ * 5. 对于特殊格式的数据，需要包装一下，注明type和通道id
+ * 这里需要返回一个promise，用于记录如果是特殊格式的传输回传的通道id
+ * 参数注解:
+ * 注: 当特殊格式的数据传输完毕，请手动调用一次，data.data设置为Null
+ * {
+        type: '数据类型', // 自定义，用于接收端解析
+        channelType: '通道类型', // 注明是ArrayBuffer还是Blob，如果这两种都不是，不用注明
+        channelId: '通道id', //当传真正的特殊格式数据时，需要传递该参数
+        data: Any //真正需要传递的数据
+    }
+    注：销毁通道由接收方进行
+ */
+
 fn.updateData = function (data) {
-    if (!this.rtcConnection || !this.dataChannel) return
-    this.dataChannel.send(data);
-}
-// dataChannel事件监听
-fn.onDataChannel = function () {
     let that = this
-    this.dataChannel.onopen = function () {
-        console.log('dataChannel opened, ready now');
+    if (!this.rtcConnection || !this.dataChannel) return Promise.reject('no rtc connection')
+    if (data.constructor === Object) {
+        // 是否是特殊格式的传输
+        if (data.channelId) {
+            let tmp = this.rtcDataChannels[data.channelId]
+            console.log(`${this.getDate()} ---- send ArrayBuffer`)
+            if (tmp.readyState !== 'open') return Promise.reject('dataChannel state error')
+            tmp.send(data.data);
+
+            return Promise.resolve()
+        }
+        // 是否需要新建通道
+        let channelId
+        if (/(Blob|ArrayBuffer)/.test(data.channelType)) {
+            return this.createDataChannel(data.channelType).then((channelId) => {
+                data.channelId = channelId
+                next();
+                return Promise.resolve(channelId)
+            })
+        }
+
+        next();
+
+        function next() {
+            // 普通数据传递
+            data = JSON.stringify(data)
+
+            if (that.dataChannel.readyState !== 'open') return Promise.reject('dataChannel state error')
+            that.dataChannel.send(data);
+        }
+
+    }
+    if (this.dataChannel.readyState !== 'open') return Promise.reject('dataChannel state error')
+    this.dataChannel.send(data);
+    return Promise.resolve()
+}
+// 新建通道
+/**
+ * 为了防止新建通道刚刚建立还未注册事件就发送数据，导致对端收不到数据，这里需要做个防抖，采用promise
+ */
+fn.createDataChannel = function (label) {
+    if (!this.rtcConnection) return Promise.reject('no rtc connection')
+    label = label + Date.now()
+    let dataChannel = this.rtcConnection.createDataChannel(label);
+    this.rtcDataChannels[label] = dataChannel
+    this.onDataChannel(dataChannel)
+    console.log(`${this.getDate()} ---- 建立通道: ${label} ---> ${dataChannel.id}`)
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve(label)
+        }, 1000)
+    })
+}
+fn.getDate = function(){
+    let now = new Date()
+    now = now.toLocaleString()
+    return now
+}
+/**
+ * dataChannel事件监听
+ * 由于有可能有多个通道，这里需要传入需要注册事件的通道
+ * 
+ */
+fn.onDataChannel = function (channel) {
+    let that = this
+    // console.log(`${that.getDate()} ---- 通道事件注册:`, channel)
+    channel.onopen = function () {
+        console.log(`${that.getDate()} ---- ${channel.id} --> dataChannel opened, ready now`);
     };
-    this.dataChannel.onerror = function (error) {
-        console.error("dataChannel error:", error);
+    channel.onerror = function (error) {
+        console.error(`${that.getDate()} ---- ${channel.id} --> dataChannel error:`, error);
     };
-    this.dataChannel.onmessage = function (data) {
-        console.log(data);
-        that.listeners['data'] && that.listeners['data'](data.data);
+    channel.onmessage = function (event) {
+
+        let data = event.data
+
+        if (data.constructor === String) data = JSON.parse(data)
+
+        // 如果是文件发送完毕，则关闭通道
+        if (!data && channel.label in that.rtcDataChannels) {
+            that.closeChannel(channel)
+            return
+        }
+
+        if (/(Blob|ArrayBuffer)/.test(data.constructor)) data = { channelId: channel.label, data }
+
+        that.listeners['data'] && that.listeners['data'](data);
+
     };
+    channel.onclose = function (data) {
+        console.warn(`${that.getDate()} ---- ${channel.id} --> dataChannel closed now`);
+        // 关闭自己端的通道
+        that.closeChannel(channel)
+    };
+}
+/**
+ * 关闭通道
+ * 由于有可能有多个通道，这里需要参数指定
+ * 参数注解，channel可以为channelId，也可以是dataChannel实体
+ */
+fn.closeChannel = function (channel) {
+    if (!channel) return
+    if (channel.constructor !== RTCDataChannel) {
+        channel = this.rtcDataChannels[channel]
+    }
+    console.log(`${this.getDate()} ---- 销毁通道: ${channel.label} --> ${channel.id}`)
+    channel.close();
+    channel.onopen = null
+    channel.onerror = null
+    channel.onmessage = null
+    channel.onclose = null
+    this.rtcDataChannels[channel.label] = null
 }
 /** 将对方加入自己的候选者中 */
 fn.onNewPeer = function (candidate) {
