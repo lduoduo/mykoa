@@ -1,0 +1,36 @@
+<% include ../layout/header.html %>
+
+<div class="rtc__show">
+    <div class="header__box">
+        <a href="https://lduoduo.github.io" class="logo__link">
+            <p class="logo__text">哎朵朵</p>
+            <div class="logo__rotate"></div>
+        </a>
+    </div>
+    <h2 class="rtc__show__title">dataChannel<br>点对点传输更快更安全<br class="rtc__show__wrap"></h2>
+    <div class="btn__common__box ">
+        <input class="input rtc__channelName" type="text" placeholder="请输入数字房间号，相同房间可进行通信哦">
+        <a class="btn btn__white J-start">立即体验</a>
+        <a class="btn btn__white J-startMedia">开启音视频</a>
+        <div class="video__share__url J-share-url"></div>
+    </div>
+    <div class="rtc__show__media ">
+        <div class="rtc__video">
+            <video class="video local J-local-video"></video>
+            <video class="video remote J-remote-video"></video>
+        </div>
+        <div class="rtc__text">
+            <div class="item">
+                <input class="input rtc__data J-rtc-data" type="text" placeholder="输入任意内容">
+            </div>
+            <div class="item">
+                <a class="input rtc__file hide">选择文件</a>
+            </div>
+            <div class="item">
+                <a class="btn btn__white J-send">发送</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% include ../layout/footer.html %>

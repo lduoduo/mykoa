@@ -1,9 +1,60 @@
-html{
+html {
     font-size: 16px;
 }
-body{
+
+body {
     background: #f3f3f3;
 }
-.hide{
+
+@font-face {
+    font-family: 'taotao';
+    src: url('../fonts/taotao.eot');
+    src: url('../fonts/taotao.eot?#iefix') format('embedded-opentype'), url('../fonts/taotao.woff') format('woff'), url('../fonts/taotao.ttf') format('ttf'), url('../fonts/taotao.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'dingding';
+    src: url('../fonts/dingding.eot');
+    src: url('../fonts/dingding.eot?#iefix') format('embedded-opentype'), 
+    url('../fonts/dingding.woff') format('woff'), 
+    url('../fonts/dingding.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'ldodo';
+    src: url('../fonts/ldodo.gif');
+    src: url('../fonts/ldodo.bmp') format('woff'), 
+    url('../fonts/ldodo.jpg') format('truetype'), 
+    url('#TianZhen') format('svg');
+}
+
+.cssb8a14be5819800 {
+    font-family: 'TianZhenb8a14be5819800';
+}
+
+.hide {
     display: none !important;
+}
+
+.footer {
+    height: 30px;
+    width: 100%;
+    position: fixed;
+    bottom: 20px;
+    overflow: hidden;
+    text-align: center;
+}
+
+.footer .logo {
+    width: 30px;
+    height: 30px;
+    background: url('../img/github.png') no-repeat;
+    display: inline-block;
+    background-size: 100%;
+    background-position: center;
+    vertical-align: middle;
 }

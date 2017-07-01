@@ -81,6 +81,7 @@ wss.on('connection', function connection(ws, req) {
     // const ip = req.connection.remoteAddress;
     // prod
     // const ip = req.headers['x-forwarded-for'];
+    console.log(req.headers)
 
 
     const location = url.parse(req.url, true);
@@ -118,8 +119,8 @@ wss.on('connection', function connection(ws, req) {
             console.log(`sb going to join-->`, roomId, Object.keys(tmp));
             if (Object.keys(tmp).length >= 2) {
                 //通知要连接的客户，当前房间已经满员，不能加入
-                ws.send('self', { code: 500, error: "房间已满" });
-                console.log(`房间：${roomId}已满`)
+                ws.send('self', { type: 'join', code: 500, error: "房间已满, 请另选房间重新加入" });
+                console.log(`房间：${roomId}已满，请另选房间重新加入`)
                 return;
             }
             if (userinfo && userinfo.id && userinfo.name) {
@@ -142,6 +143,7 @@ wss.on('connection', function connection(ws, req) {
 
             //给自己发消息
             ws.send('self', {
+                type: 'join', 
                 code: 200,
                 user: {
                     id: user.id, name: user.name

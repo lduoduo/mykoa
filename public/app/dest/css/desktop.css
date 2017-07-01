@@ -1,5 +1,6 @@
 body {
     color: rgb(92, 97, 101);
+    /*font-family: 'TianZhenb8a14be5819800';*/
     font-family: "Open Sans", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", 微软雅黑, sans-serif;
     -webkit-font-smoothing: antialiased;
     font-size: 16px;
@@ -7,11 +8,13 @@ body {
     margin: 0;
     padding: 0;
 }
+
 h2 {
     font-size: 40px;
     line-height: 58px;
     font-weight: normal;
 }
+
 .video__show {
     height: 100vh;
     width: 100vw;
@@ -19,32 +22,42 @@ h2 {
     background: linear-gradient(120deg, #07CEB8 0, #2291F1 70%, #2291F1 100%);
     color: #fff;
 }
+
 .video__show__title {
     padding: 5px 0 10px;
     line-height: 1.2;
 }
-.video__show__title, .video__show__desc {
+
+.video__show__title,
+.video__show__desc {
     color: #fff;
     text-align: center;
 }
+
 .btn__common__box {
     height: 50px;
     text-align: center;
     position: relative;
 }
-.btn__common__box .video__share__url{
+
+.btn__common__box .video__share__url {
     font-size: 20px;
-    
 }
-.btn__common__box .strong{
+
+.btn__common__box .strong {
     font-size: 25px;
     margin: 0;
 }
-.btn__white, .btn__white-hover {
+
+.btn__white {
     line-height: 38px;
     color: #29B9CC;
     background-color: #fff;
     border: 2px solid #fff;
+}
+.btn__white:hover {
+    color: #0e6671;
+    background-color: #cbeae9;
 }
 
 .btn {
@@ -69,24 +82,60 @@ a {
 a {
     background: transparent;
 }
-.header__box{
+
+.header__box {
     width: 100%;
-    /* height: 73px; */
+    height: 62px;
     text-align: left;
     padding: 10px 20px;
     font-size: 30px;
-    
 }
-.header__box a{
-    color: #fff;
+
+.header__box .logo__link {
+    width: 100px;
+    height: 100px;
+    /*background: #fff;*/
+    display: inline-block;
+    margin: 20px;
+    position: relative;
 }
+
+.header__box .logo__rotate {
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    transform-origin: center;
+    transform: rotate(45deg);
+    transition: all 0.2s linear;
+    background: #fff;
+}
+
+.header__box .logo__text {
+    z-index: 111;
+    position: absolute;
+    top: 0;
+    color: #000;
+    font-family: 'ldodo',arial,sans-serif;
+    /*font-family: 'TianZhenb8a14be5819800';*/
+    width: 100%;
+    text-align: center;
+    /*font-size: 2.5em;*/
+    -webkit-box-reflect: below 5% linear-gradient(transparent, transparent, 60%, rgba(0, 0, 0, .3));
+}
+
+.header__box .logo__link:hover .logo__rotate {
+    transform: rotate(0deg);
+    background-color: pink;
+}
+
 .video__show__media {
     text-align: center;
     /* padding: 20px; */
     /* width: 600px; */
     margin: 20px;
 }
-.video__show__media video{
+
+.video__show__media video {
     width: 70vw;
     height: 50vh;
     background: #000;

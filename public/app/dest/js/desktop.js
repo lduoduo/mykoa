@@ -93,16 +93,14 @@ let home = {
     },
     // 连接rtc发送流
     startRtc(stream) {
-        let roomId = Date.now() + ['a', 'b', 'c', 'd'][Math.floor(Math.random() * 4)]
-        // let ip = '192.168.31.210';
-        // let ip = '10.242.96.105';        
+        let roomId = Date.now() + ['a', 'b', 'c', 'd'][Math.floor(Math.random() * 4)]      
 
-        let address = `wss://${window.location.hostname}/rtcWs/?roomId=${roomId}`;
+        let url = `wss://${window.location.hostname}/rtcWs/?roomId=${roomId}`;
 
         this.rtcOut = new rtcPeer();
-        this.rtcOut.init(address, stream)
+        this.rtcOut.init({ url, stream })
 
-        let url = window.location.origin + window.location.pathname + '?roomid=' + roomId;
+        url = window.location.origin + window.location.pathname + '?roomid=' + roomId;
 
         this.toggleTip(true, `复制下方连接给朋友吧，目前只支持一个朋友观看哦<br><p class="strong">${url}</p>`)
         console.log(url)
@@ -128,8 +126,8 @@ let invoke = {
     supportedEventList: null,
     // extension的命令，做什么事
     command: {
-        DESKTOP_CAPTURE: '1',
-        DESKTOP_SHARE: '2'
+        DESKTOP_ONLY: '1',
+        DESKTOP_AUDIO: '2'
     },
     // 回调监听
     listeners: {},
@@ -166,11 +164,11 @@ let invoke = {
         }, false);
         this.isInited = true
     },
-    // 检测是否安装插件
-    test() {
+    start() {
         if (this.checkPromise) return this.checkPromise
+        this.init()
         let extensionId = this.extensionId
-        window.postMessage({ from: "client", extensionId, command: this.command.DESKTOP_CAPTURE }, "*");
+        window.postMessage({ from: "client", extensionId, type: this.command.DESKTOP_AUDIO }, "*");
         this.checkPromise = new Promise((resolve, reject) => {
             setTimeout(() => {
                 this.checkPromise = null
@@ -180,17 +178,13 @@ let invoke = {
         })
         return this.checkPromise
     },
-    start() {
-        this.init()
-        return this.test()
-    },
     // 连接rtc获取流
     getStream(data) {
         let that = this
         let url = data.wss
         this.rtcIn = new rtcPeer();
 
-        this.rtcIn.init(url);
+        this.rtcIn.init({ url });
         this.rtcIn.on('stream', function (mediastream) {
             that.listeners['mediastream'] && that.listeners['mediastream'](mediastream, url)
         }.bind(this))
