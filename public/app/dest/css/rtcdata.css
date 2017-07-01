@@ -16,10 +16,10 @@ h2 {
 }
 
 .rtc__show {
-    height: 100vh;
+    min-height: calc(100vh - 50px);
     width: 100vw;
     overflow: hidden;
-    background: linear-gradient(120deg, #07CEB8 0, #2291F1 70%, #2291F1 100%);
+    /*background: linear-gradient(120deg, #07CEB8 0, #2291F1 70%, #2291F1 100%);*/
     color: #fff;
 }
 

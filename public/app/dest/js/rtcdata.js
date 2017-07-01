@@ -152,8 +152,8 @@ var home = {
 
         let stream = this.localStream
 
-        // let host = 'ldodo.cc'
-        let host = window.location.hostname + ':8099'
+        let host = 'ldodo.cc'
+        // let host = window.location.hostname + ':8099'
 
         let url = `wss://${host}/rtcWs/?roomId=${cname}`;
 

@@ -3,7 +3,8 @@ html {
 }
 
 body {
-    background: #f3f3f3;
+    /*background: #f3f3f3;*/
+    background: linear-gradient(120deg, #07CEB8 0, #4fd8c9 30%,#2291F1 70%, #4c7da7 100%);
 }
 
 @font-face {
@@ -41,10 +42,9 @@ body {
 }
 
 .footer {
-    height: 30px;
     width: 100%;
-    position: fixed;
-    bottom: 20px;
+    height: 50px;
+    padding: 10px 0;
     overflow: hidden;
     text-align: center;
 }
@@ -57,4 +57,32 @@ body {
     background-size: 100%;
     background-position: center;
     vertical-align: middle;
+}
+ul{
+    list-style: none;
+}
+.rtc__component{
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+.rtc__component .item{
+    width: 200px;
+    height: 200px;
+    display: inline-block;
+    background: #fff;
+    color: #000;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    text-align: center;
+    /* display: flex; */
+    box-sizing: border-box;
+    padding: 80px 0;
+    font-size: 25px;
+    margin: 0 10px;
+    cursor: pointer;
+}
+.rtc__component .item:hover{
+    background: rgba(255, 192, 203, 0.7);
+    color: #fff;
 }
