@@ -1,22 +1,19 @@
-var https = require('http');
-var koa = require('koa');
-var app = koa();
+// var https = require('http');
+// var koa = require('koa');
+// var app = koa();
+// app.proxy = true;
+
 const url = require('url');
 const WebSocket = require('ws');
 
-var fs = require('fs');
 var config = require('./config');
-
-//https option
-var options = {
-    key: fs.readFileSync('keys/server.key'),
-    cert: fs.readFileSync('keys/server.crt'),
-};
+//临时改一下
+config.socketPortws = 8099;
 
 //https
 // var server = https.createServer(options, app.callback());
-var server = https.createServer(app.callback());
-const wss = new WebSocket.Server({ server });
+// var server = https.createServer(app.callback());
+const wss = new WebSocket.Server({ port: config.socketPortws });
 
 // 心跳逻辑
 function heartbeat() {
@@ -81,7 +78,8 @@ wss.on('connection', function connection(ws, req) {
     // const ip = req.connection.remoteAddress;
     // prod
     // const ip = req.headers['x-forwarded-for'];
-    console.log(req.headers)
+    // console.log(req.headers)
+    console.log(`ip : ${req.headers['x-forwarded-for']}`)
 
 
     const location = url.parse(req.url, true);
@@ -264,16 +262,9 @@ wss.remove = function(ws) {
     this.clients.delete(ws)
 }
 
-//临时改一下
-config.socketPortws = 8099;
-
 module.exports = function() {
-    // app.listen(config.socketPort);
+    
+    console.log('ws server https on ' + config.socketPortws + ' env: ' + config.env);
 
-    server.listen(config.socketPortws, function() {
-        console.log('ws server https on ' + config.socketPortws + ' env: ' + config.env);
-    });
-
-    // console.log('socket http on ' + config.socketPort);
 }
 

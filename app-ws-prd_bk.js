@@ -1,6 +1,8 @@
-var https = require('https');
+var https = require('http');
 var koa = require('koa');
 var app = koa();
+app.proxy = true;
+
 const url = require('url');
 const WebSocket = require('ws');
 
@@ -14,9 +16,8 @@ var options = {
 };
 
 //https
-var server = https.createServer(options, app.callback(function(e){
-    console.log(e)
-}));
+// var server = https.createServer(options, app.callback());
+var server = https.createServer(app.callback());
 const wss = new WebSocket.Server({ server });
 
 // 心跳逻辑
@@ -60,7 +61,7 @@ wss.on('connection', function connection(ws, req) {
     // 缓存ws.send方法
     let send = ws.send
     // 改写包装
-    ws.send = function (type, data) {
+    ws.send = function(type, data) {
         // 如果客户端连接已关闭，不再发送消息
         if (this.readyState !== WebSocket.OPEN) return
         data.code = data.code || 200
@@ -79,9 +80,11 @@ wss.on('connection', function connection(ws, req) {
     var user = {};
 
     // dev
-    const ip = req.connection.remoteAddress;
+    // const ip = req.connection.remoteAddress;
     // prod
     // const ip = req.headers['x-forwarded-for'];
+    console.log(req.headers)
+    console.log(req.connection.remoteAddress)
 
 
     const location = url.parse(req.url, true);
@@ -116,11 +119,11 @@ wss.on('connection', function connection(ws, req) {
         },
         // 加入房间
         join(userinfo) {
-            console.log(`${ip} going to join-->`, roomId, Object.keys(tmp));
+            console.log(`sb going to join-->`, roomId, Object.keys(tmp));
             if (Object.keys(tmp).length >= 2) {
                 //通知要连接的客户，当前房间已经满员，不能加入
                 ws.send('self', { type: 'join', code: 500, error: "房间已满, 请另选房间重新加入" });
-                console.log(`房间：${roomId}已满`)
+                console.log(`房间：${roomId}已满，请另选房间重新加入`)
                 return;
             }
             if (userinfo && userinfo.id && userinfo.name) {
@@ -243,7 +246,7 @@ wss.broadcast = function broadcast(ws) {
  * 如果单独访问这个方法，则视为广播给所有人的消息
  * data: 发送的消息体
  */
-wss.send = function (type, data) {
+wss.send = function(type, data) {
     if (!data) return
     if (!this.sendingList) return send(this.clients)
 
@@ -258,7 +261,7 @@ wss.send = function (type, data) {
 /**
  * 移除连接实体ws
  */
-wss.remove = function (ws) {
+wss.remove = function(ws) {
     if (!ws) return
     // 这里的clients数据结构是set，删除相对简单
     this.clients.delete(ws)
@@ -267,10 +270,10 @@ wss.remove = function (ws) {
 //临时改一下
 config.socketPortws = 8099;
 
-module.exports = function () {
+module.exports = function() {
     // app.listen(config.socketPort);
 
-    server.listen(config.socketPortws, function () {
+    server.listen(config.socketPortws, function() {
         console.log('ws server https on ' + config.socketPortws + ' env: ' + config.env);
     });
 

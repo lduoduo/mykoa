@@ -30,7 +30,29 @@ var home = {
             $('#fileInput').click()
         })
         $('body').on('change', '#fileInput', this.selectedFile.bind(this))
-
+        $('body').on('click', '.J-remote-video', function () {
+            let local = $localVideo.srcObject
+            let remote = $remoteVideo.srcObject
+            $localVideo.srcObject = local
+            $remoteVideo.srcObject = remote
+        })
+        $('body').on('click', '.J-capture', function () {
+            $('.J-capture').toggleClass('active')
+            if ($('.J-capture').hasClass('active')) {
+                if (!$remoteVideo.srcObject) {
+                    Mt.alert({
+                        title: '当前没有远程视频流，无法截图',
+                        confirmBtnMsg: '好'
+                    });
+                    return
+                }
+                that.setupCanvas()
+                $('.J-capture').html('关闭远程视频截图')
+            } else {
+                that.closeCanvas()
+                $('.J-capture').html('开启远程视频截图[对端接收并显示]')
+            }
+        })
 
         window.addEventListener('beforeunload', this.destroy.bind(this));
     },
@@ -140,6 +162,105 @@ var home = {
 
         });
     },
+    // 关闭远程视频截图功能
+    closeCanvas() {
+        if (this.canvasTimer) {
+            // 销毁定时器
+            clearInterval(this.canvasTimer)
+            this.canvasTimer = null
+            // 销毁通道
+            this.canvasChannelId && this.rtc.closeChannel(this.canvasChannelId)
+            this.canvasChannelId = null
+        }
+    },
+    // 远程视频截图
+    /**
+     * 
+     * 开启远程视频截图功能
+     */
+    setupCanvas() {
+        if (this.canvasTimer) {
+            return
+        }
+        let srcObj = $remoteVideo.srcObject
+        let that = this
+
+        let canvas = this.canvas
+
+        if (!canvas) {
+            canvas = this.canvas = document.createElement('canvas')
+            canvas.width = 500;
+            canvas.height = 400;
+        }
+
+        let ctx = canvas.getContext('2d')
+
+        this.rtc.createChannel({
+            label: 'canvas',
+            channelStatus: 'long'
+        }).then(cid => {
+            // console.log(cid)
+            if (!cid) return
+
+            this.canvasChannelId = cid
+            this.canvasTimer = setInterval(next.bind(this), 100)
+        })
+
+        function next() {
+            // 先重绘
+            ctx.drawImage($remoteVideo, 0, 0, 500, 400);
+            canvas.toBlob(function (blob) {
+                blob.name = 'canvas'
+                // blob.type = 'blob'
+                console.log('canvas data:', blob)
+                that.sendCanvas(blob)
+            }, 'image/jpeg');
+        }
+
+    },
+    // 发送canvas, 需要长连接不要关闭
+    sendCanvas(blob) {
+        if (!this.rtc || !this.rtc.inited) return
+
+        let that = this
+        let size = blob.size;
+        let name = blob.name;
+        let chunkSize = 16384;
+        let channelId = this.canvasChannelId
+
+        this.rtc.updateData({
+            type: blob.type || 'image',
+            channelId,
+            data: {
+                name,
+                size,
+                chunkSize
+            }
+        })
+
+        sliceFile(0);
+
+        function sliceFile(offset) {
+            var reader = new FileReader();
+            reader.onload = (function () {
+                return function (e) {
+                    let data = e.target.result
+                    // that.sendData({ type: 'file', data: { data } });
+                    that.sendData({ channelId, data });
+
+                    if (blob.size > offset + e.target.result.byteLength) {
+                        setTimeout(sliceFile, 0, offset + chunkSize);
+                    }
+                    else {
+                        that.sendData({ channelId, data: null });
+                    }
+                    // sendProgress.value = offset + e.target.result.byteLength;
+                };
+            })(blob);
+            var slice = blob.slice(offset, offset + chunkSize);
+            reader.readAsArrayBuffer(slice);
+        };
+    },
     // 选择文件, 多文件
     selectedFile() {
         let fileInput = document.querySelector('input#fileInput')
@@ -209,6 +330,8 @@ var home = {
 
         this.rtc.updateData(data).then(channelId => {
             console.log(channelId)
+        }).catch(err => {
+            console.warn(err)
         })
     },
     // 这里讲音视频数据转成blob
@@ -286,17 +409,18 @@ var home = {
             let {type, channelId, data} = result
 
             // 初始化文件接收工作
-            if (type && type === 'file' && channelId) {
+            if (type && /(file|image|canvas)/.test(type) && channelId) {
                 let tmp = this.remote[channelId] = {}
                 tmp.size = data.size
                 tmp.receivedSize = 0
-                tmp.fileName = data.name
+                tmp.name = data.name
+                tmp.type = type
                 tmp.buffer = []
                 return
             }
 
             // 文件接收
-            if (data.constructor === ArrayBuffer) {
+            if (data && data.constructor === ArrayBuffer) {
                 return this.onReceiveFile(result)
             }
         }
@@ -328,14 +452,35 @@ var home = {
         let received = new window.Blob(receiveBuffer);
         receiveBuffer = [];
 
-        let a = document.createElement('a')
-        a.href = URL.createObjectURL(received);
-        a.download = data.fileName;
-        a.textContent = `收到文件,点击下载: ${data.fileName} ( ${data.size} bytes)`;
-        a.style.display = 'block';
-        a.style.background = '#fff';
+        // 如果是文件，展示为下载链接
+        if (data.type === 'file') {
+            let a = document.createElement('a')
+            a.href = URL.createObjectURL(received);
+            a.download = data.name;
+            a.textContent = `收到文件,点击下载: ${data.name} ( ${data.size} bytes)`;
+            a.style.display = 'block';
+            a.style.background = '#fff';
 
-        $('.rtc__file')[0].parentNode.appendChild(a)
+            $('.rtc__file')[0].parentNode.appendChild(a)
+            return
+        }
+        // 如果是图片，进行canvas渲染
+        if (/image/.test(data.type)) {
+            let canvas = this.canvas = document.querySelector('.J-canvas')
+            let ctx = canvas.getContext('2d');
+
+            let img = new Image();
+            let url = URL.createObjectURL(received);
+
+            img.onload = function () {
+                canvas.width = img.width
+                canvas.height = img.height
+                ctx.drawImage(img, 0, 0);
+                URL.revokeObjectURL(url);
+            }
+
+            img.src = url;
+        }
     },
     // 远程连接断开
     stopRTC(uid) {

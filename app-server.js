@@ -2,6 +2,7 @@
 
 var koa = require('koa');
 var app = koa();
+app.proxy = true;
 
 var http = require('http');
 var https = require('https');

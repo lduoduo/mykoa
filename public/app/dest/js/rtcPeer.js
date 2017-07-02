@@ -292,7 +292,7 @@ fn.initPeerEvent = function () {
     // 远端流附加了轨道
     rtcConnection.ontrack = function (event) {
         let stream = event.streams[0]
-        console.log("get remote stream", stream);
+        console.log("get remote track", stream);
         that.listeners['stream'] && that.listeners['stream'](stream);
     };
 
@@ -475,6 +475,7 @@ fn.updateStream = function (stream) {
         data: Any //真正需要传递的数据
     }
     注：销毁通道由接收方进行
+    注：如果需要申请长连接，创建后不再关闭通道，需要传递一个参数 channelLife: 'long'，默认是短连接
  */
 
 fn.updateData = function (data) {
@@ -482,18 +483,20 @@ fn.updateData = function (data) {
     if (!this.rtcConnection || !this.dataChannel) return Promise.reject('no rtc connection')
     if (data.constructor === Object) {
         // 是否是特殊格式的传输
-        if (data.channelId) {
+        if (data.data && /(Blob|ArrayBuffer)/.test(data.data.constructor)) {
+            if(!data.channelId) return Promise.reject('no channelId')
             let tmp = this.rtcDataChannels[data.channelId]
             console.log(`${this.getDate()} ---- send ArrayBuffer`)
-            if (tmp.readyState !== 'open') return Promise.reject('dataChannel state error')
-            tmp.send(data.data);
 
+            if (!tmp || tmp.readyState !== 'open') return Promise.reject('dataChannel state error')
+
+            tmp.send(data.data);
             return Promise.resolve()
         }
         // 是否需要新建通道
         let channelId
         if (/(Blob|ArrayBuffer)/.test(data.channelType)) {
-            return this.createDataChannel(data.channelType).then((channelId) => {
+            return this.createChannel({ label: data.channelType }).then((channelId) => {
                 data.channelId = channelId
                 next();
                 return Promise.resolve(channelId)
@@ -503,27 +506,44 @@ fn.updateData = function (data) {
         next();
 
         function next() {
+            console.log('next', data)
             // 普通数据传递
             data = JSON.stringify(data)
 
             if (that.dataChannel.readyState !== 'open') return Promise.reject('dataChannel state error')
             that.dataChannel.send(data);
         }
+        return Promise.resolve()
 
     }
     if (this.dataChannel.readyState !== 'open') return Promise.reject('dataChannel state error')
-    this.dataChannel.send(data);
+    console.log('normal', data)
+    this.dataChannel.send(JSON.stringify(data));
     return Promise.resolve()
 }
 // 新建通道
 /**
  * 为了防止新建通道刚刚建立还未注册事件就发送数据，导致对端收不到数据，这里需要做个防抖，采用promise
+ * 对外公开的API
+ * option.label: 通道名字
+ * option.channelStatus: 连接类型：long:长连接，数据发送完毕不会关闭, short(默认值): 短连接，数据发送完毕立即关闭销毁
+ * option.channelType: 发送的数据类型，目前有ArrayBuffer / Blob(目前chrome还不支持该类型)，可选
+ * option.type: 传输内容的类型，用于接收端解析，目前有文件，图片什么的
+ * option.data: 里面包含该文件的具体信息，比如name / size等等
  */
-fn.createDataChannel = function (label) {
+fn.createChannel = function (option = {}) {
     if (!this.rtcConnection) return Promise.reject('no rtc connection')
+
+    let {label, channelStatus = 'short'} = option
+
+    if (!label) return Promise.reject('missing parameter: label')
+
     label = label + Date.now()
+    // let name = label + Date.now()
+    label = channelStatus + '-' + label
     let dataChannel = this.rtcConnection.createDataChannel(label);
     this.rtcDataChannels[label] = dataChannel
+
     this.onDataChannel(dataChannel)
     console.log(`${this.getDate()} ---- 建立通道: ${label} ---> ${dataChannel.id}`)
     return new Promise((resolve, reject) => {
@@ -531,8 +551,21 @@ fn.createDataChannel = function (label) {
             resolve(label)
         }, 1000)
     })
+    // .then((label) => {
+    //     let sendData = {
+    //         type: type,
+    //         channelId: label,
+    //         channelType: channelType,
+    //         data: data
+    //     }
+    //     sendData = JSON.stringify(sendData)
+
+    //     if (this.dataChannel.readyState !== 'open') return Promise.reject('dataChannel state error')
+    //     this.dataChannel.send(sendData);
+    //     return Promise.resolve(label)
+    // })
 }
-fn.getDate = function(){
+fn.getDate = function () {
     let now = new Date()
     now = now.toLocaleString()
     return now
@@ -557,8 +590,8 @@ fn.onDataChannel = function (channel) {
 
         if (data.constructor === String) data = JSON.parse(data)
 
-        // 如果是文件发送完毕，则关闭通道
-        if (!data && channel.label in that.rtcDataChannels) {
+        // 如果是短连接, 数据发送完毕后关闭通道
+        if (!data && channel.label in that.rtcDataChannels && /^short-/.test(channel.label)) {
             that.closeChannel(channel)
             return
         }
@@ -577,7 +610,7 @@ fn.onDataChannel = function (channel) {
 /**
  * 关闭通道
  * 由于有可能有多个通道，这里需要参数指定
- * 参数注解，channel可以为channelId，也可以是dataChannel实体
+ * 参数注解，channel可以为channelLabel，也可以是dataChannel实体
  */
 fn.closeChannel = function (channel) {
     if (!channel) return
